@@ -53,7 +53,9 @@ def reply():
     if new_data[0] != old_data[0] or new_data[1] != old_data[1] or new_data[2] != old_data[2]:
         old_data = [new_data[0], new_data[1], new_data[2]]
         store_old_data(old_data, file_name_data)
-        api.update_status('#UPDATE\n\nInformasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + str(confirmed) + '\nMeninggal: ' + str(deaths) + '\nSembuh: ' + str(recovered) + '\n\nSumber: https://www.worldometers.info/coronavirus/country/indonesia/')
+        print('Update kasus...')
+        api.update_status('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + str(confirmed) + '\nMeninggal: ' + str(deaths) + '\nSembuh: ' + str(recovered) + '\n\nSumber: https://www.worldometers.info/coronavirus/country/indonesia/')
+        print('Berhasil melakukan twit!')
         
     last_id = retrieve_last_id(file_name_id)
     mentions = api.mentions_timeline(last_id, tweet_mode='extended')
