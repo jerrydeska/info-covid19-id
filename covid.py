@@ -74,9 +74,9 @@ def reply():
         for x in range(0,3):
             if x == 0:
                 twit.append('Jumlah Positif: ')
-            if x == 1:
-                twit.append('Meninggal: ')
             if x == 2:
+                twit.append('Meninggal: ')
+            if x == 1:
                 twit.append('Sembuh: ')
 
             if new_data[x] != old_data[x]:
@@ -100,7 +100,7 @@ def reply():
         store_last_id(last_id, file_name_id)
         if '#kasus' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + new_data[0] + '\nMeninggal: ' + new_data[1] + "\nSembuh: " + new_data[2] + "\n\nSumber: https://www.worldometers.info/coronavirus/country/indonesia/", mention.id)
+            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + new_data[0] + '\nMeninggal: ' + new_data[2] + "\nSembuh: " + new_data[1] + "\n\nSumber: https://www.worldometers.info/coronavirus/country/indonesia/", mention.id)
             print("Berhasil membalas twit!")
         if '#gejala' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
