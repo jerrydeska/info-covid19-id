@@ -1,1 +1,1 @@
-"worker: python covid.py" 
+worker: python covid.py
