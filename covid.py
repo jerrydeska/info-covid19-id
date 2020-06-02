@@ -46,7 +46,6 @@ def scraping():
     src = result.content
     soup = BeautifulSoup(src, 'lxml')
     links = soup.find_all("td")
-
     new_data = []
 
     for link in links:
@@ -54,7 +53,7 @@ def scraping():
             new_data.append(link.text)
             if len(new_data) == 3:
                 break
-    
+            
     return new_data
 
 def reply():
@@ -67,17 +66,17 @@ def reply():
         if new_data[x] != old_data[x]:
             key = True
             break
-    
+
     if key:
         twit = []
         twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
         for x in range(0,3):
             if x == 0:
                 twit.append('Jumlah Positif: ')
-            if x == 2:
-                twit.append('Meninggal: ')
             if x == 1:
                 twit.append('Sembuh: ')
+            if x == 2:
+                twit.append('Meninggal: ')
 
             if new_data[x] != old_data[x]:
                 dev = int(new_data[x].replace('.', '')) - int(old_data[x].replace('.', ''))
@@ -100,7 +99,7 @@ def reply():
         store_last_id(last_id, file_name_id)
         if '#kasus' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + new_data[0] + '\nMeninggal: ' + new_data[2] + "\nSembuh: " + new_data[1] + "\n\nSumber: https://kemkes.go.id/", mention.id)
+            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + new_data[0] + "\nSembuh: " + new_data[1] + '\nMeninggal: ' + new_data[2] +  "\n\nSumber: https://kemkes.go.id/", mention.id)
             print("Berhasil membalas twit!")
         if '#gejala' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
