@@ -24,9 +24,9 @@ RSAD Tk. II Pelamonia;Sulawesi Selatan
 
 RSAL Dr. Mintoharjo;DKI Jakarta
 
-RSUD Arifin Achmad;Riau
-
 RSBP Batam;Kepulauan Riau
+
+RSUD Arifin Achmad;Riau
 
 RSD Gunung Jati;Jawa Barat
 
@@ -45,6 +45,8 @@ RSU dr. R. Sudjono Selong;Nusa Tenggara Barat
 RSU dr. Sobirin Musirawas;Sumatera Selatan
 
 RSU dr. Sudarso Pontianak;Kalimantan Barat
+
+RSUD Dr. H. Chasan Boesoeri Ternate;Maluku Utara
 
 RSU dr. M. Haulussy Ambon;Maluku
 
@@ -89,8 +91,6 @@ RSUD dr. Drajat Prawiranegara Serang;Banten
 RSUD dr. H. Abdul Moeloek;Lampung
 
 RSUD dr. H. Bob Bazar, S.K.M., Kalianda;Lampung
-
-RSUD Dr. H. Chasan Boesoeri Ternate;Maluku Utara
 
 RSUD dr. H. Soemarno Sosroatmodjo Tanjung Selor;Kalimantan Utara
 
@@ -142,6 +142,8 @@ RSUD Idaman Banjarbaru;Kalimantan Selatan
 
 RSUD Indramayu;Jawa Barat
 
+RSUD Manokwari;Papua Barat
+
 RSUD Jayapura;Papua
 
 RSUD Jend. A. Yani;Lampung
@@ -175,8 +177,6 @@ RSUD Labuang Baji;Sulawesi Selatan
 RSUD Lakipadada;Sulawesi Selatan
 
 RSUD Luwuk Banggai;Sulawesi Tengah
-
-RSUD Manokwari;Papua Barat
 
 RSUD Merauke;Papua
 
