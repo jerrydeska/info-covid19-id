@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import tweepy
 import time
 import os
+import csv
 from os import environ
 
 CONSUMER_KEY = environ['CONSUMER_KEY']
@@ -27,7 +28,6 @@ def store_last_id(last_id, file_name_id):
     write = open(file_name_id, 'w')
     write.write(str(last_id))
     write.close()
-    return
 
 def retrieve_old_data(file_name_data):
     read = open(file_name_data, 'r')
@@ -56,6 +56,35 @@ def scraping():
             
     return new_data
 
+def rujukan(mention):
+    with open ('daftar_rujukan.csv', 'r') as csv_file:
+        csv_reader = csv.DictReader(csv_file, delimiter=';')
+        twit = []
+
+        key = False
+        for line in csv_reader:
+            if not key:
+                if line['provinsi'].lower() in mention:
+                    provinsi = line['provinsi'].lower()
+                    twit.append("#rujukan " + line['provinsi'] + "\n\n")
+                    twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
+                    key = True
+            else:
+                if line['provinsi'].lower() == provinsi and provinsi in mention:
+                    if provinsi == 'riau' and 'kepulauan riau' not in mention:
+                        twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
+                    elif provinsi == 'papua' and 'papua barat' not in mention:
+                        twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
+                    elif provinsi == 'maluku' and 'maluku utara' not in mention:
+                        twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
+                    else:
+                        twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
+        csv_file.close()
+    
+    separator = ''
+    final_twit = separator.join(twit)
+    return final_twit
+
 def reply():
     print('Mengambil data...')
     new_data = scraping()
@@ -68,6 +97,7 @@ def reply():
             break
 
     if key:
+        print("Mendapat data baru...")
         twit = []
         twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
         for x in range(0,3):
@@ -91,6 +121,7 @@ def reply():
 
         store_old_data(old_data, file_name_data)
         api.update_status(final_twit)
+        print("Berhasil twit data baru!")
         
     last_id = retrieve_last_id(file_name_id)
     mentions = api.mentions_timeline(last_id, tweet_mode='extended')
@@ -114,6 +145,11 @@ def reply():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
             image = api.media_upload(filename = "img/Cara-Cegah-Virus-Corona.jpeg")
             api.update_status(status = '@' + mention.user.screen_name + ' Sumber: Kemkominfo RI', in_reply_to_status_id = mention.id, media_ids = [image.media_id])
+            print("Berhasil membalas twit!")
+        if '#rujukan' in mention.full_text.lower():
+            print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
+            final_twit = rujukan(mention.full_text.lower())
+            api.update_status('@' + mention.user.screen_name + ' ' + final_twit, mention.id)
             print("Berhasil membalas twit!")
 
 while True:
