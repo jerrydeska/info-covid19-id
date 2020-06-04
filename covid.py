@@ -4,7 +4,17 @@ import tweepy
 import time
 import os
 import csv
+import mysql.connector
 from os import environ
+
+db = mysql.connector.connect(
+    host = environ['HOST'],
+    user = environ['USER'],
+    passwd = environ['PASSWD'],
+    database = environ['DATABASE']
+)
+
+mydb = db.cursor()
 
 CONSUMER_KEY = environ['CONSUMER_KEY']
 CONSUMER_SECRET = environ['CONSUMER_SECRET']
@@ -15,45 +25,42 @@ auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
 
-file_name_id = 'id.txt'
-file_name_data = 'data.txt'
-
-def retrieve_last_id(file_name_id):
-    read = open(file_name_id, 'r')
-    last_id = int(read.read())
-    read.close()
+def retrieve_last_id():
+    mydb.execute('SELECT * FROM mention_id')
+    fetch = mydb.fetchall()
+    last_id = [list(i) for i in fetch]
     return last_id
 
-def store_last_id(last_id, file_name_id):
-    write = open(file_name_id, 'w')
-    write.write(str(last_id))
-    write.close()
+def store_last_id(last_id):
+    mydb.execute("DELETE FROM mention_id")
+    mydb.execute("INSERT INTO mention_id VALUES('" + last_id[0][0] + "')")
+    db.commit()
 
-def retrieve_old_data(file_name_data):
-    read = open(file_name_data, 'r')
-    old_data = read.read().splitlines()
-    read.close()
+def retrieve_old_data():
+    mydb.execute('SELECT * FROM old_data')
+    fetch = mydb.fetchall()
+    old_data = [list(i) for i in fetch]
     return old_data
 
-def store_old_data(data, file_name_data):
-    with open(file_name_data, 'w') as write:
-        for item in data:
-            write.write("%s\n" % item)
-        write.close()
+def store_old_data(data):
+    mydb.execute("DELETE FROM old_data")
+    mydb.execute("INSERT INTO old_data VALUES('" + data[0][0] + "','" + data[0][1] + "','" + data[0][2] + "')")
+    db.commit()
 
 def scraping():
     result = requests.get('https://kemkes.go.id/')
     src = result.content
     soup = BeautifulSoup(src, 'lxml')
     links = soup.find_all("td")
-    new_data = []
+    data = []
 
     for link in links:
         if "case" in link.attrs['class']:
-            new_data.append(link.text)
-            if len(new_data) == 3:
+            data.append(link.text)
+            if len(data) == 3:
                 break
-            
+    
+    new_data = [data]
     return new_data
 
 def rujukan(mention):
@@ -88,11 +95,11 @@ def rujukan(mention):
 def reply():
     print('Mengambil data...')
     new_data = scraping()
-    old_data = retrieve_old_data(file_name_data)
+    old_data = retrieve_old_data()
     key = False
 
     for x in range(0,3):
-        if new_data[x] != old_data[x]:
+        if new_data[0][x] != old_data[0][x]:
             key = True
             break
 
@@ -108,26 +115,26 @@ def reply():
             if x == 2:
                 twit.append('Meninggal: ')
 
-            if new_data[x] != old_data[x]:
-                dev = int(new_data[x].replace('.', '')) - int(old_data[x].replace('.', ''))
-                old_data[x] = new_data[x]
-                twit.append(new_data[x] + ' (+' + str(dev) + ')\n')
+            if new_data[0][x] != old_data[0][x]:
+                dev = int(new_data[0][x].replace('.', '')) - int(old_data[0][x].replace('.', ''))
+                old_data[0][x] = new_data[0][x]
+                twit.append(new_data[0][x] + ' (+' + str(dev) + ')\n')
             else:
-                twit.append(new_data[x] + '\n')
+                twit.append(new_data[0][x] + '\n')
 
         twit.append('\nSumber: https://kemkes.go.id/')
         separator = ''
         final_twit = separator.join(twit)
 
-        store_old_data(old_data, file_name_data)
+        store_old_data(old_data)
         api.update_status(final_twit)
         print("Berhasil twit data baru!")
         
-    last_id = retrieve_last_id(file_name_id)
-    mentions = api.mentions_timeline(last_id, tweet_mode='extended')
+    last_id = retrieve_last_id()
+    mentions = api.mentions_timeline(last_id[0][0], tweet_mode='extended')
     for mention in reversed(mentions):
-        last_id = mention.id
-        store_last_id(last_id, file_name_id)
+        last_id[0][0] = mention.id
+        store_last_id(last_id)
         if '#kasus' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
             api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + new_data[0] + "\nSembuh: " + new_data[1] + '\nMeninggal: ' + new_data[2] +  "\n\nSumber: https://kemkes.go.id/", mention.id)
