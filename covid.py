@@ -33,7 +33,7 @@ def retrieve_last_id():
 
 def store_last_id(last_id):
     mydb.execute("DELETE FROM mention_id")
-    mydb.execute("INSERT INTO mention_id VALUES('" + last_id[0][0] + "')")
+    mydb.execute("INSERT INTO mention_id VALUES('" + str(last_id[0][0]) + "')")
     db.commit()
 
 def retrieve_old_data():
