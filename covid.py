@@ -47,7 +47,7 @@ def store_old_data(data):
     mydb.execute("INSERT INTO old_data VALUES('" + data[0][0] + "','" + data[0][1] + "','" + data[0][2] + "')")
     db.commit()
 
-def scraping():
+def scraping_data():
     result = requests.get('https://kemkes.go.id/')
     src = result.content
     soup = BeautifulSoup(src, 'lxml')
@@ -92,43 +92,75 @@ def rujukan(mention):
     final_twit = separator.join(twit)
     return final_twit
 
+def twit_data(old_data, new_data):
+    print("Mendapatkan data baru...")
+    twit = []
+    twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
+    for x in range(0,3):
+        if x == 0:
+            twit.append('Jumlah Positif: ')
+        if x == 1:
+            twit.append('Sembuh: ')
+        if x == 2:
+            twit.append('Meninggal: ')
+
+        if new_data[0][x] != old_data[0][x]:
+            dev = int(new_data[0][x].replace('.', '')) - int(old_data[0][x].replace('.', ''))
+            old_data[0][x] = new_data[0][x]
+            twit.append(new_data[0][x] + ' (+' + str(dev) + ')\n')
+        else:
+            twit.append(new_data[0][x] + '\n')
+
+    twit.append('\nSumber: https://kemkes.go.id/')
+    separator = ''
+    final_twit = separator.join(twit)
+
+    store_old_data(old_data)
+    api.update_status(final_twit)
+    print("Berhasil twit data baru!")
+
+def scraping_article():
+    result = requests.get('https://covid19.go.id/p/hoax-buster')
+    src = result.content
+    soup = BeautifulSoup(src, 'html.parser')
+    link = soup.find("a", class_="text-color-dark")
+
+    article = []
+    article.append(link.text)
+    article.append(link.attrs['href'])
+
+    new_article = [article]
+    return new_article
+
+def retrieve_old_article():
+    mydb.execute('SELECT * FROM hoax_buster')
+    fetch = mydb.fetchall()
+    old_article = [list(i) for i in fetch]
+    return old_article
+
+def store_old_article(article):
+    mydb.execute("DELETE FROM hoax_buster")
+    mydb.execute("INSERT INTO hoax_buster VALUES('" + article[0][0] + "','" + article[0][1] + "')")
+    db.commit()
+
 def reply():
     print('Mengambil data...')
-    new_data = scraping()
+    new_data = scraping_data()
     old_data = retrieve_old_data()
-    key = False
 
     for x in range(0,3):
         if new_data[0][x] != old_data[0][x]:
-            key = True
+            twit_data(old_data, new_data)
             break
 
-    if key:
-        print("Mendapat data baru...")
-        twit = []
-        twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
-        for x in range(0,3):
-            if x == 0:
-                twit.append('Jumlah Positif: ')
-            if x == 1:
-                twit.append('Sembuh: ')
-            if x == 2:
-                twit.append('Meninggal: ')
-
-            if new_data[0][x] != old_data[0][x]:
-                dev = int(new_data[0][x].replace('.', '')) - int(old_data[0][x].replace('.', ''))
-                old_data[0][x] = new_data[0][x]
-                twit.append(new_data[0][x] + ' (+' + str(dev) + ')\n')
-            else:
-                twit.append(new_data[0][x] + '\n')
-
-        twit.append('\nSumber: https://kemkes.go.id/')
-        separator = ''
-        final_twit = separator.join(twit)
-
-        store_old_data(old_data)
-        api.update_status(final_twit)
-        print("Berhasil twit data baru!")
+    new_article = scraping_article()
+    old_article = retrieve_old_article()
+    
+    if new_article[0][1] != old_article[0][1]:
+        print("Mendapatkan artikel baru...")
+        store_old_article(new_article)
+        api.update_status("#HoaxBuster\n" + new_article[0][0] + "\n\nSelengkapnya: " + new_article[0][1])
+        print("Berhasil twit artikel baru!")
         
     last_id = retrieve_last_id()
     mentions = api.mentions_timeline(last_id[0][0], tweet_mode='extended')
