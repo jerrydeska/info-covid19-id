@@ -73,7 +73,7 @@ def rujukan(mention):
             if not key:
                 if line['provinsi'].lower() in mention:
                     provinsi = line['provinsi'].lower()
-                    twit.append("#rujukan " + line['provinsi'] + "\n\n")
+                    twit.append(Rujukan " + line['provinsi'] + "\n\n")
                     twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
                     key = True
             else:
@@ -95,7 +95,7 @@ def rujukan(mention):
 def twit_data(old_data, new_data):
     print("Mendapatkan data baru...")
     twit = []
-    twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
+    twit.append('#Update\nInformasi kasus COVID-19 terbaru:\n\n')
     for x in range(0,3):
         if x == 0:
             twit.append('Jumlah Positif: ')
