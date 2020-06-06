@@ -73,7 +73,7 @@ def rujukan(mention):
             if not key:
                 if line['provinsi'].lower() in mention:
                     provinsi = line['provinsi'].lower()
-                    twit.append(Rujukan " + line['provinsi'] + "\n\n")
+                    twit.append("Rujukan " + line['provinsi'] + "\n\n")
                     twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
                     key = True
             else:
