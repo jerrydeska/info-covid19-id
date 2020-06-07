@@ -142,7 +142,7 @@ def scraping_article(old_article):
     return new_article
 
 def retrieve_old_article():
-    mydb.execute('SELECT * FROM hoax_buster WHERE id=1')
+    mydb.execute('SELECT * FROM hoax_buster WHERE id = 1')
     fetch = mydb.fetchall()
     old_article = [list(i) for i in fetch]
     return old_article
