@@ -150,9 +150,8 @@ def retrieve_old_article():
 def store_old_article(article):
     mydb.execute("DELETE FROM hoax_buster")
     mydb.execute("ALTER TABLE hoax_buster AUTO_INCREMENT=1;")
-    for i in range(0, len(article)):
-        mydb.execute("INSERT INTO hoax_buster VALUES('" + article[i][0] + "','" + article[i][1] + "', 0)")
-        db.commit()
+    mydb.execute("INSERT INTO hoax_buster VALUES('" + article[0][0] + "','" + article[0][1] + "', 0)")
+    db.commit()
 
 def reply():
     print('Mengambil data...')
