@@ -73,7 +73,7 @@ def rujukan(mention):
             if not key:
                 if line['provinsi'].lower() in mention:
                     provinsi = line['provinsi'].lower()
-                    twit.append("Rujukan " + line['provinsi'] + "\n\n")
+                    twit.append("#rujukan " + line['provinsi'] + "\n\n")
                     twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
                     key = True
             else:
@@ -95,7 +95,7 @@ def rujukan(mention):
 def twit_data(old_data, new_data):
     print("Mendapatkan data baru...")
     twit = []
-    twit.append('#Update\nInformasi kasus COVID-19 terbaru:\n\n')
+    twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
     for x in range(0,3):
         if x == 0:
             twit.append('Jumlah Positif: ')
@@ -119,29 +119,40 @@ def twit_data(old_data, new_data):
     api.update_status(final_twit)
     print("Berhasil twit data baru!")
 
-def scraping_article():
+def scraping_article(old_article):
     result = requests.get('https://covid19.go.id/p/hoax-buster')
     src = result.content
     soup = BeautifulSoup(src, 'html.parser')
-    link = soup.find("a", class_="text-color-dark")
 
-    article = []
-    article.append(link.text)
-    article.append(link.attrs['href'])
+    check = False
+    i = 0
+    new_article = []
 
-    new_article = [article]
+    while not check:
+        link = soup.find_all("a", class_="text-color-dark")[i]
+        if link.attrs['href'] == old_article[0][1]:
+            check = True
+        else:
+            article = []
+            article.append(link.text)
+            article.append(link.attrs['href'])
+            new_article.append(article)
+        i += 1
+
     return new_article
 
 def retrieve_old_article():
-    mydb.execute('SELECT * FROM hoax_buster')
+    mydb.execute('SELECT * FROM hoax_buster WHERE id=1')
     fetch = mydb.fetchall()
     old_article = [list(i) for i in fetch]
     return old_article
 
 def store_old_article(article):
     mydb.execute("DELETE FROM hoax_buster")
-    mydb.execute("INSERT INTO hoax_buster VALUES('" + article[0][0] + "','" + article[0][1] + "')")
-    db.commit()
+    mydb.execute("ALTER TABLE hoax_buster AUTO_INCREMENT=1;")
+    for i in range(0, len(article)):
+        mydb.execute("INSERT INTO hoax_buster VALUES('" + article[i][0] + "','" + article[i][1] + "', 'NULL'")
+        db.commit()
 
 def reply():
     print('Mengambil data...')
@@ -152,15 +163,16 @@ def reply():
         if new_data[0][x] != old_data[0][x]:
             twit_data(old_data, new_data)
             break
-
-    new_article = scraping_article()
-    old_article = retrieve_old_article()
     
-    if new_article[0][1] != old_article[0][1]:
+    old_article = retrieve_old_article()
+    new_article = scraping_article(old_article)
+    
+    if new_article:
         print("Mendapatkan artikel baru...")
         store_old_article(new_article)
-        api.update_status("#HoaxBuster\n" + new_article[0][0] + "\n\nSelengkapnya: " + new_article[0][1])
-        print("Berhasil twit artikel baru!")
+        for i in range(0, len(new_article)):
+            api.update_status("#HoaxBuster\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
+            print("Berhasil twit artikel baru!")
         
     last_id = retrieve_last_id()
     mentions = api.mentions_timeline(last_id[0][0], tweet_mode='extended')
