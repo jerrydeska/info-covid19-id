@@ -199,8 +199,11 @@ def reply():
         if '#rujukan' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
             final_twit = rujukan(mention.full_text.lower())
-            api.update_status('@' + mention.user.screen_name + ' ' + final_twit, mention.id)
-            print("Berhasil membalas twit!")
+            if final_twit:
+                api.update_status('@' + mention.user.screen_name + ' ' + final_twit, mention.id)
+                print("Berhasil membalas twit!")
+            else:
+                print("Provinsi tidak ada!")
 
 while True:
     reply()
