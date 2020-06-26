@@ -191,7 +191,7 @@ def reply():
     for mention in reversed(mentions):
         last_id[0][0] = mention.id
         store_last_id(last_id)
-        if '#kasus' in mention.full_text.lower():
+        if '#kasusindo' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
             api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + new_data[0][0] + "\nSembuh: " + new_data[0][1] + '\nMeninggal: ' + new_data[0][2] +  "\n\nSumber: https://kemkes.go.id/", mention.id)
             print("Berhasil membalas twit!")
