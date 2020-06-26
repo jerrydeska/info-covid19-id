@@ -93,14 +93,14 @@ def kasusprov(mention):
     for i in res:
         if 'papua barat' in mention.lower():
             if i['attributes']['Provinsi'].lower() == 'papua barat':
-                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
+                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + int(i['attributes']['Kasus_Posi']) + "\nSembuh: " + int(i['attributes']['Kasus_Semb']) + "\nMeninggal: " + int(i['attributes']['Kasus_Meni']) + "\n\nSumber: https://kawalcorona.com/"
                 break
         elif 'maluku utara' in mention.lower():
             if i['attributes']['Provinsi'].lower() == 'maluku utara':
-                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
+                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + int(i['attributes']['Kasus_Posi']) + "\nSembuh: " + int(i['attributes']['Kasus_Semb']) + "\nMeninggal: " + int(i['attributes']['Kasus_Meni']) + "\n\nSumber: https://kawalcorona.com/"
                 break
         elif i['attributes']['Provinsi'].lower() in mention.lower():
-            final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
+            final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + int(i['attributes']['Kasus_Posi']) + "\nSembuh: " + int(i['attributes']['Kasus_Semb']) + "\nMeninggal: " + int(i['attributes']['Kasus_Meni']) + "\n\nSumber: https://kawalcorona.com/"
             break
     
     return final_twit
