@@ -73,23 +73,36 @@ def rujukan(mention):
             if not key:
                 if line['provinsi'].lower() in mention:
                     provinsi = line['provinsi'].lower()
-                    twit.append("#rujukan " + line['provinsi'] + "\n\n")
+                    twit.append("Rujukan " + line['provinsi'] + "\n\n")
                     twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
                     key = True
             else:
-                if line['provinsi'].lower() == provinsi and provinsi in mention:
-                    if provinsi == 'riau' and 'kepulauan riau' not in mention:
-                        twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
-                    elif provinsi == 'papua' and 'papua barat' not in mention:
-                        twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
-                    elif provinsi == 'maluku' and 'maluku utara' not in mention:
-                        twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
-                    else:
-                        twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
+                if line['provinsi'].lower() == provinsi:
+                    twit.append(line['rumah_sakit'].replace("Â", "") + "\n")
         csv_file.close()
     
     separator = ''
     final_twit = separator.join(twit)
+    return final_twit
+
+def kasusprov(mention):
+    result = requests.get('https://api.kawalcorona.com/indonesia/provinsi')
+    res = result.json()
+    final_twit = ''
+
+    for i in res:
+        if 'papua barat' in mention.lower():
+            if i['attributes']['Provinsi'].lower() == 'papua barat':
+                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
+                break
+        elif 'maluku utara' in mention.lower():
+            if i['attributes']['Provinsi'].lower() == 'maluku utara':
+                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
+                break
+        elif i['attributes']['Provinsi'].lower() in mention.lower():
+            final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
+            break
+    
     return final_twit
 
 def twit_data(old_data, new_data):
@@ -199,6 +212,14 @@ def reply():
         if '#rujukan' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
             final_twit = rujukan(mention.full_text.lower())
+            if final_twit:
+                api.update_status('@' + mention.user.screen_name + ' ' + final_twit, mention.id)
+                print("Berhasil membalas twit!")
+            else:
+                print("Provinsi tidak ada!")
+        if '#kasusprov' in mention.full_text.lower():
+            print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
+            final_twit = kasusprov(mention.full_text.lower())
             if final_twit:
                 api.update_status('@' + mention.user.screen_name + ' ' + final_twit, mention.id)
                 print("Berhasil membalas twit!")
