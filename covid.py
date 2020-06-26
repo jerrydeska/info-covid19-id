@@ -228,5 +228,5 @@ def reply():
 
 while True:
     reply()
-    time.sleep(30)
+    time.sleep(15)
     
