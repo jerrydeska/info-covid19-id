@@ -6,6 +6,9 @@ import os
 import csv
 import mysql.connector
 from os import environ
+from datetime import datetime
+import pandas
+from matplotlib import pyplot
 
 db = mysql.connector.connect(
     host = environ['HOST'],
@@ -93,14 +96,14 @@ def kasusprov(mention):
     for i in res:
         if 'papua barat' in mention.lower():
             if i['attributes']['Provinsi'].lower() == 'papua barat':
-                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + str(i['attributes']['Kasus_Posi']) + "\nSembuh: " + str(i['attributes']['Kasus_Semb']) + "\nMeninggal: " + str(i['attributes']['Kasus_Meni']) + "\n\nSumber: https://kawalcorona.com/"
+                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
                 break
         elif 'maluku utara' in mention.lower():
             if i['attributes']['Provinsi'].lower() == 'maluku utara':
-                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + str(i['attributes']['Kasus_Posi']) + "\nSembuh: " + str(i['attributes']['Kasus_Semb']) + "\nMeninggal: " + str(i['attributes']['Kasus_Meni']) + "\n\nSumber: https://kawalcorona.com/"
+                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
                 break
         elif i['attributes']['Provinsi'].lower() in mention.lower():
-            final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + str(i['attributes']['Kasus_Posi']) + "\nSembuh: " + str(i['attributes']['Kasus_Semb']) + "\nMeninggal: " + str(i['attributes']['Kasus_Meni']) + "\n\nSumber: https://kawalcorona.com/"
+            final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
             break
     
     return final_twit
@@ -112,13 +115,15 @@ def twit_data(old_data, new_data):
     for x in range(0,3):
         if x == 0:
             twit.append('Jumlah Positif: ')
-        if x == 1:
+        elif x == 1:
             twit.append('Sembuh: ')
-        if x == 2:
+        elif x == 2:
             twit.append('Meninggal: ')
 
         if new_data[0][x] != old_data[0][x]:
             dev = int(new_data[0][x].replace('.', '')) - int(old_data[0][x].replace('.', ''))
+            if x == 0:
+                make_graph(dev)
             old_data[0][x] = new_data[0][x]
             twit.append(new_data[0][x] + ' (+' + str(dev) + ')\n')
         else:
@@ -129,8 +134,20 @@ def twit_data(old_data, new_data):
     final_twit = separator.join(twit)
 
     store_old_data(old_data)
-    api.update_status(final_twit)
+    image = api.media_upload(filename = "img/graph.png")
+    api.update_status(final_twit, media_ids = [image.media_id])
     print("Berhasil twit data baru!")
+
+def make_graph(new_case):
+    date = datetime.now().strftime('%Y-%m-%d')
+    mydb.execute("INSERT INTO new_cases VALUES('" + date + "'," + new_case + ")")
+    db.commit()
+
+    df = pandas.read_sql("SELECT * FROM new_cases", db)
+    df['date'] = pandas.to_datetime(df['date'])
+    pyplot.plot(df['date'],df['new_case'])
+    pyplot.title("Grafik Kasus Baru")
+    pyplot.savefig('img/graph.png', bbox_inches='tight')
 
 def scraping_article(old_article):
     result = requests.get('https://covid19.go.id/p/hoax-buster')
@@ -191,7 +208,7 @@ def reply():
     for mention in reversed(mentions):
         last_id[0][0] = mention.id
         store_last_id(last_id)
-        if '#kasusindo' in mention.full_text.lower():
+        if '#kasus' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
             api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + new_data[0][0] + "\nSembuh: " + new_data[0][1] + '\nMeninggal: ' + new_data[0][2] +  "\n\nSumber: https://kemkes.go.id/", mention.id)
             print("Berhasil membalas twit!")
@@ -217,7 +234,7 @@ def reply():
                 print("Berhasil membalas twit!")
             else:
                 print("Provinsi tidak ada!")
-        if '#kasusprov' in mention.full_text.lower():
+        if '#prov' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
             final_twit = kasusprov(mention.full_text.lower())
             if final_twit:
@@ -228,5 +245,5 @@ def reply():
 
 while True:
     reply()
-    time.sleep(15)
+    time.sleep(30)
     
