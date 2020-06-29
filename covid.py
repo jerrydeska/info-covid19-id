@@ -140,7 +140,7 @@ def twit_data(old_data, new_data):
 
 def make_graph(new_case):
     date = datetime.now().strftime('%Y-%m-%d')
-    mydb.execute("INSERT INTO new_cases VALUES('" + date + "'," + new_case + ")")
+    mydb.execute("INSERT INTO new_cases VALUES('" + str(date) + "'," + str(new_case) + ")")
     db.commit()
 
     df = pandas.read_sql("SELECT * FROM new_cases", db)
