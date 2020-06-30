@@ -102,6 +102,14 @@ def kasusprov(mention):
             if i['attributes']['Provinsi'].lower() == 'maluku utara':
                 final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
                 break
+        elif 'yogyakarta' in mention.lower():
+            if i['attributes']['Provinsi'].lower() == 'daerah istimewa yogyakarta':
+                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
+                break
+        elif 'bangka belitung' in mention.lower():
+            if i['attributes']['Provinsi'].lower() == 'kepulauan bangka belitung':
+                final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
+                break
         elif i['attributes']['Provinsi'].lower() in mention.lower():
             final_twit = "Kasus Provinsi " + i['attributes']['Provinsi'] + "\n\nJumlah Positif: " + i['attributes']['Kasus_Posi'] + "\nSembuh: " + i['attributes']['Kasus_Semb'] + "\nMeninggal: " + i['attributes']['Kasus_Meni'] + "\n\nSumber: https://kawalcorona.com/"
             break
