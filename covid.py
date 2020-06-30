@@ -145,46 +145,6 @@ def twit_data(old_data, new_data):
     image = api.media_upload(filename = "img/graph1.png")
     api.update_status(final_twit, media_ids = [image.media_id])
     print("Berhasil twit data baru!")
-    time.sleep(10)
-
-    cumulative_prov_graph()
-    tweet_id = get_newest_update_id()
-    image = api.media_upload(filename = "img/graph2.png")
-    api.update_status(status = '@infoCOVID19_id Grafik Jumlah Penderita Kumulatif per Provinsi', in_reply_to_status_id = tweet_id, media_ids = [image.media_id])
-    print("Berhasil twit data baru!")
-    
-def get_newest_update_id():
-    tweets = api.user_timeline()
-    for tweet in tweets:
-        if "#UPDATE" in tweet.text:
-            tweet_id = tweet.id
-            break
-    return tweet_id
-
-def cumulative_prov_graph():
-    result = requests.get('https://api.kawalcorona.com/indonesia/provinsi')
-    res = result.json()
-
-    x = []
-    y = []
-
-    for i in res:
-        if i['attributes']['Provinsi'] == "Daerah Istimewa Yogyakarta" :
-            x.append("Yogyakarta")
-        elif i['attributes']['Provinsi'] == "Kepulauan Bangka Belitung" :
-            x.append("Bangka Belitung")
-        else:
-            x.append(i['attributes']['Provinsi'])
-        y.append(i['attributes']['Kasus_Posi'])
-
-    pyplot.figure(num=2, figsize=(15, 8), dpi=80, facecolor='w', edgecolor='k')
-    bar_elements = pyplot.barh(x,y)
-    for elem in bar_elements:
-        pyplot.text(elem.get_x() + elem.get_width() + 10, elem.get_y(), elem.get_width())
-    date = datetime.now().strftime('%d-%m-%Y')
-    pyplot.title("Jumlah Penderita Kumulatif per Provinsi (" + date + ")")
-    pyplot.grid(True, axis='x')
-    pyplot.savefig('img/graph2.png', bbox_inches='tight')
 
 def daily_case_graph(new_case):
     date = datetime.now().strftime('%Y-%m-%d')
