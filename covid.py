@@ -145,8 +145,10 @@ def make_graph(new_case):
 
     df = pandas.read_sql("SELECT * FROM new_cases", db)
     df['date'] = pandas.to_datetime(df['date'])
+    pyplot.figure(num=1, figsize=(15, 8), dpi=80, facecolor='w', edgecolor='k')
     pyplot.plot(df['date'],df['new_case'])
-    pyplot.title("Grafik Kasus Baru")
+    pyplot.title("Kasus Baru")
+    pyplot.grid(True)
     pyplot.savefig('img/graph.png', bbox_inches='tight')
 
 def scraping_article(old_article):
