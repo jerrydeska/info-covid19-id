@@ -149,7 +149,7 @@ def twit_data(old_data, new_data):
 
 def daily_case_graph(new_case):
     date = datetime.now().strftime('%Y-%m-%d')
-    mydb.execute("INSERT INTO new_cases VALUES('" + str(date) + "'," + str(new_case[0]) + "," + str(new_case[1]) + "," + str(new_case[2]) + ")")
+    mydb.execute("INSERT INTO daily_case VALUES('" + str(date) + "'," + str(new_case[0]) + "," + str(new_case[1]) + "," + str(new_case[2]) + ")")
     db.commit()
 
     df = pandas.read_sql("SELECT * FROM daily_case", db)
