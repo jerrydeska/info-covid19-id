@@ -119,6 +119,7 @@ def kasusprov(mention):
 def twit_data(old_data, new_data):
     print("Mendapatkan data baru...")
     twit = []
+    new_case = []
     twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
     for x in range(0,3):
         if x == 0:
@@ -130,8 +131,7 @@ def twit_data(old_data, new_data):
 
         if new_data[0][x] != old_data[0][x]:
             dev = int(new_data[0][x].replace('.', '')) - int(old_data[0][x].replace('.', ''))
-            if x == 0:
-                daily_case_graph(dev)
+            new_case.append(dev)
             old_data[0][x] = new_data[0][x]
             twit.append(new_data[0][x] + ' (+' + str(dev) + ')\n')
         else:
@@ -141,6 +141,7 @@ def twit_data(old_data, new_data):
     separator = ''
     final_twit = separator.join(twit)
 
+    daily_case_graph(new_case)
     store_old_data(old_data)
     image = api.media_upload(filename = "img/graph1.png")
     api.update_status(final_twit, media_ids = [image.media_id])
@@ -148,15 +149,18 @@ def twit_data(old_data, new_data):
 
 def daily_case_graph(new_case):
     date = datetime.now().strftime('%Y-%m-%d')
-    mydb.execute("INSERT INTO new_cases VALUES('" + str(date) + "'," + str(new_case) + ")")
+    mydb.execute("INSERT INTO new_cases VALUES('" + str(date) + "'," + str(new_case[0]) + "," + str(new_case[1]) + "," + str(new_case[2]) + ")")
     db.commit()
 
-    df = pandas.read_sql("SELECT * FROM new_cases", db)
+    df = pandas.read_sql("SELECT * FROM daily_case", db)
     df['date'] = pandas.to_datetime(df['date'])
-    pyplot.figure(num=1, figsize=(15, 8), dpi=80, facecolor='w', edgecolor='k')
-    pyplot.plot(df['date'],df['new_case'])
-    pyplot.title("Kasus Baru")
+    pyplot.figure(num=None, figsize=(15, 8), dpi=80)
+    pyplot.plot(df['date'],df['positive'])
+    pyplot.plot(df['date'],df['cured'])
+    pyplot.plot(df['date'],df['death'])
+    pyplot.title("Kasus per Hari")
     pyplot.grid(True)
+    pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 16})
     pyplot.savefig('img/graph1.png', bbox_inches='tight')
 
 def scraping_article(old_article):
