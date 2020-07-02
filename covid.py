@@ -196,6 +196,40 @@ def store_old_article(article):
     mydb.execute("INSERT INTO hoax_buster VALUES('" + article[0][0] + "','" + article[0][1] + "', 0)")
     db.commit()
 
+def scraping_news(old_news):
+    result = requests.get('https://covid19.go.id/p/berita')
+    src = result.content
+    soup = BeautifulSoup(src, 'html.parser')
+
+    check = False
+    i = 0
+    new_news = []
+
+    while not check:
+        link = soup.find_all("a", class_="text-color-dark")[i]
+        if link.attrs['href'] == old_news[0][1]:
+            check = True
+        else:
+            if 'infografis' not in link.text.lower():
+                news = []
+                news.append(link.text)
+                news.append(link.attrs['href'])
+                new_news.append(news)
+        i += 1
+
+    return new_news
+
+def retrieve_old_news():
+    mydb.execute('SELECT * FROM berita')
+    fetch = mydb.fetchall()
+    old_article = [list(i) for i in fetch]
+    return old_news
+
+def store_old_news(news):
+    mydb.execute("DELETE FROM berita")
+    mydb.execute("INSERT INTO berita VALUES('" + news[0][0] + "','" + news[0][1] + "')")
+    db.commit()
+
 def reply():
     print('Mengambil data...')
     new_data = scraping_data()
@@ -215,6 +249,16 @@ def reply():
         for i in range(0, len(new_article)):
             api.update_status("#HoaxBuster\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
             print("Berhasil twit artikel baru!")
+
+    old_news = retrieve_old_news()
+    new_news = scraping_news(old_news)
+
+    if new_news:
+        print("Mendapatkan berita baru...")
+        store_old_news(new_news)
+        for i in range(0, len(new_news)):
+            api.update_status("#BeritaTerkini\n" + new_news[i][0] + "\n\nSelengkapnya: " + new_news[i][1])
+            print("Berhasil twit berita baru!")
         
     last_id = retrieve_last_id()
     mentions = api.mentions_timeline(last_id[0][0], tweet_mode='extended')
