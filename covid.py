@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 import tweepy
 import time
-import os
 import csv
 import mysql.connector
 from os import environ
@@ -160,7 +159,7 @@ def daily_case_graph(new_case):
     pyplot.plot(df['date'],df['death'])
     pyplot.title("Kasus per Hari")
     pyplot.grid(True)
-    pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 16})
+    pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 14})
     pyplot.savefig('img/graph1.png', bbox_inches='tight')
 
 def scraping_article(old_article):
