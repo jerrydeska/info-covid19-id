@@ -222,7 +222,7 @@ def scraping_news(old_news):
 def retrieve_old_news():
     mydb.execute('SELECT * FROM berita')
     fetch = mydb.fetchall()
-    old_article = [list(i) for i in fetch]
+    old_news = [list(i) for i in fetch]
     return old_news
 
 def store_old_news(news):
