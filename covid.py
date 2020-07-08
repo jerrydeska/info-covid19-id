@@ -247,7 +247,7 @@ def reply():
         print("Mendapatkan artikel baru...")
         store_old_article(new_article)
         for i in range(0, len(new_article)):
-            api.update_status(status="#HoaxBuster\n" + new_article[i][0] + "\n\nSelengkapnya: ", attachment_url=new_article[i][1])
+            api.update_status(status="#HoaxBuster\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
             print("Berhasil twit artikel baru!")
 
     old_news = retrieve_old_news()
@@ -257,7 +257,7 @@ def reply():
         print("Mendapatkan berita baru...")
         store_old_news(new_news)
         for i in range(0, len(new_news)):
-            api.update_status(status="#BeritaTerkini\n" + new_news[i][0] + "\n\nSelengkapnya: ", attachment_url=new_news[i][1])
+            api.update_status(status="#BeritaTerkini\n" + new_news[i][0] + "\n\nSelengkapnya: " + new_news[i][1])
             print("Berhasil twit berita baru!")
         
     last_id = retrieve_last_id()
