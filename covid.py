@@ -50,15 +50,18 @@ def store_old_data(data):
     db.commit()
 
 def scraping_data():
-    result = requests.get('https://api.kawalcorona.com/indonesia')
-    res = result.json()
+    result = requests.get('https://kemkes.go.id/')
+    src = result.content
+    soup = BeautifulSoup(src, 'lxml')
+    links = soup.find_all("td")
     data = []
 
-    for x in res:
-        data.append(x['positif'].replace(",", "."))
-        data.append(x['sembuh'].replace(",", "."))
-        data.append(x['meninggal'].replace(",", "."))
-        
+    for link in links:
+        if "case" in link.attrs['class']:
+            data.append(link.text)
+            if len(data) == 3:
+                break
+
     new_data = [data]
     return new_data
 
