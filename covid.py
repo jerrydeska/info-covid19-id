@@ -55,8 +55,10 @@ def scraping_data():
     data = []
 
     for x in res:
-        data.append(x.replace(",", "."))
-    
+        data.append(x['positif'].replace(",", "."))
+        data.append(x['sembuh'].replace(",", "."))
+        data.append(x['meninggal'].replace(",", "."))
+        
     new_data = [data]
     return new_data
 
