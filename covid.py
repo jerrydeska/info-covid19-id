@@ -50,17 +50,12 @@ def store_old_data(data):
     db.commit()
 
 def scraping_data():
-    result = requests.get('https://kemkes.go.id/')
-    src = result.content
-    soup = BeautifulSoup(src, 'lxml')
-    links = soup.find_all("td")
+    result = requests.get('https://api.kawalcorona.com/indonesia')
+    res = result.json()
     data = []
 
-    for link in links:
-        if "case" in link.attrs['class']:
-            data.append(link.text)
-            if len(data) == 3:
-                break
+    for x in res:
+        data.append(x.replace(",", "."))
     
     new_data = [data]
     return new_data
@@ -136,7 +131,7 @@ def twit_data(old_data, new_data):
         else:
             twit.append(new_data[0][x] + '\n')
 
-    twit.append('\nSumber: https://kemkes.go.id/')
+    twit.append('\nSumber: https://kawalcorona.com/')
     separator = ''
     final_twit = separator.join(twit)
 
@@ -247,7 +242,7 @@ def reply():
         print("Mendapatkan artikel baru...")
         store_old_article(new_article)
         for i in range(0, len(new_article)):
-            api.update_status(status="#HoaxBuster\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
+            api.update_status(status="#HoaxBuster\n" + new_article[i][0] + "\n\nSelengkapnya: ", attachment_url=new_article[i][1])
             print("Berhasil twit artikel baru!")
 
     old_news = retrieve_old_news()
@@ -257,7 +252,7 @@ def reply():
         print("Mendapatkan berita baru...")
         store_old_news(new_news)
         for i in range(0, len(new_news)):
-            api.update_status(status="#BeritaTerkini\n" + new_news[i][0] + "\n\nSelengkapnya: " + new_news[i][1])
+            api.update_status(status="#BeritaTerkini\n" + new_news[i][0] + "\n\nSelengkapnya: ", attachment_url=new_news[i][1])
             print("Berhasil twit berita baru!")
         
     last_id = retrieve_last_id()
