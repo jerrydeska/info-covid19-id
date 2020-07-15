@@ -130,7 +130,7 @@ def get_old_article(table):
 
 def set_old_article(article, table):
     mydb.execute("DELETE FROM " + table)
-    mydb.execute("INSERT INTO berita VALUES('" + article[0][0] + "','" + article[0][1] + "')")
+    mydb.execute("INSERT INTO " + table + " VALUES('" + article[0][0] + "','" + article[0][1] + "')")
     db.commit()
 
 def scraping_article(old_article, table):
@@ -138,6 +138,7 @@ def scraping_article(old_article, table):
         result = requests.get('https://covid19.go.id/p/hoax-buster')
     else:
         result = requests.get('https://covid19.go.id/p/berita')
+        
     src = result.content
     soup = BeautifulSoup(src, 'html.parser')
 
