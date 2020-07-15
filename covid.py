@@ -27,43 +27,141 @@ auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
 
-def retrieve_last_id():
+#---ID---
+
+def get_last_id():
     mydb.execute('SELECT * FROM mention_id')
     fetch = mydb.fetchall()
     last_id = [list(i) for i in fetch]
     return last_id
 
-def store_last_id(last_id):
+def set_last_id(last_id):
     mydb.execute("DELETE FROM mention_id")
     mydb.execute("INSERT INTO mention_id VALUES('" + str(last_id[0][0]) + "')")
-    db.commit()
+    db.commit() 
 
-def retrieve_old_data():
-    mydb.execute('SELECT * FROM old_data')
+#---END OF ID----
+
+#---CASE---
+
+def get_old_case():
+    mydb.execute('SELECT * FROM old_case')
     fetch = mydb.fetchall()
-    old_data = [list(i) for i in fetch]
-    return old_data
+    old_case = [list(i) for i in fetch]
+    return old_case
 
-def store_old_data(data):
-    mydb.execute("DELETE FROM old_data")
-    mydb.execute("INSERT INTO old_data VALUES('" + data[0][0] + "','" + data[0][1] + "','" + data[0][2] + "')")
+def set_old_case(case):
+    mydb.execute("DELETE FROM old_case")
+    mydb.execute("INSERT INTO old_case VALUES('" + case[0][0] + "','" + case[0][1] + "','" + case[0][2] + "')")
     db.commit()
 
-def scraping_data():
+def scraping_case():
     result = requests.get('https://kemkes.go.id/')
     src = result.content
     soup = BeautifulSoup(src, 'lxml')
     links = soup.find_all("td")
-    data = []
+    case = []
 
     for link in links:
         if "case" in link.attrs['class']:
-            data.append(link.text)
-            if len(data) == 3:
+            case.append(link.text)
+            if len(case) == 3:
                 break
 
-    new_data = [data]
-    return new_data
+    new_case = [case]
+    return new_case
+
+def twit_case(old_case, new_case):
+    print("Mendapatkan kasus baru...")
+    twit = []
+    new_case = []
+    twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
+    for x in range(0,3):
+        if x == 0:
+            twit.append('Jumlah Positif: ')
+        elif x == 1:
+            twit.append('Sembuh: ')
+        elif x == 2:
+            twit.append('Meninggal: ')
+
+        if new_case[0][x] != old_case[0][x]:
+            dev = int(new_case[0][x].replace('.', '')) - int(old_case[0][x].replace('.', ''))
+            new_case.append(dev)
+            old_case[0][x] = new_case[0][x]
+            twit.append(new_case[0][x] + ' (+' + str(dev) + ')\n')
+        else:
+            twit.append(new_case[0][x] + '\n')
+
+    twit.append('\nSumber: https://kemkes.go.id/')
+    separator = ''
+    final_twit = separator.join(twit)
+
+    daily_case_graph(new_case)
+    set_old_case(old_case)
+    image = api.media_upload(filename = "img/graph1.png")
+    api.update_status(final_twit, media_ids = [image.media_id])
+    print("Berhasil twit kasus baru!")
+
+def daily_case_graph(new_case):
+    date = datetime.now().strftime('%Y-%m-%d')
+    mydb.execute("INSERT INTO daily_case VALUES('" + str(date) + "'," + str(new_case[0]) + "," + str(new_case[1]) + "," + str(new_case[2]) + ")")
+    db.commit()
+
+    df = pandas.read_sql("SELECT * FROM daily_case", db)
+    df['date'] = pandas.to_datetime(df['date'])
+    pyplot.figure(num=None, figsize=(15, 8), dpi=80)
+    pyplot.plot(df['date'],df['positive'])
+    pyplot.plot(df['date'],df['cured'])
+    pyplot.plot(df['date'],df['death'])
+    pyplot.title("Kasus per Hari")
+    pyplot.grid(True)
+    pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 14})
+    pyplot.savefig('img/graph1.png', bbox_inches='tight')
+
+#---END OF CASE---
+
+#---ARTICLE---
+
+def get_old_article(table):
+    mydb.execute('SELECT * FROM ' + table)
+    fetch = mydb.fetchall()
+    old_article = [list(i) for i in fetch]
+    return old_article
+
+def set_old_article(article, table):
+    mydb.execute("DELETE FROM " + table)
+    mydb.execute("INSERT INTO berita VALUES('" + article[0][0] + "','" + article[0][1] + "')")
+    db.commit()
+
+def scraping_article(old_article, table):
+    if table == 'hoax':
+        result = requests.get('https://covid19.go.id/p/hoax-buster')
+    else:
+        result = requests.get('https://covid19.go.id/p/berita')
+    src = result.content
+    soup = BeautifulSoup(src, 'html.parser')
+
+    check = False
+    i = 0
+    new_article = []
+
+    while not check:
+        link = soup.find_all("a", class_="text-color-dark")[i]
+        if link.attrs['href'] == old_article[0][1]:
+            check = True
+        else:
+            if table == 'berita' and 'infografis' not in link.text.lower() or table == 'hoax':
+                article = []
+                article.append(link.text)
+                article.append(link.attrs['href'])
+                new_article.append(article)
+        i += 1
+
+    return new_article
+
+#---END OF ARTICLE---
+
+#---HOSPITAL---
 
 def rujukan(mention):
     with open ('daftar_rujukan.csv', 'r') as csv_file:
@@ -87,159 +185,42 @@ def rujukan(mention):
     final_twit = separator.join(twit)
     return final_twit
 
-def twit_data(old_data, new_data):
-    print("Mendapatkan data baru...")
-    twit = []
-    new_case = []
-    twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
-    for x in range(0,3):
-        if x == 0:
-            twit.append('Jumlah Positif: ')
-        elif x == 1:
-            twit.append('Sembuh: ')
-        elif x == 2:
-            twit.append('Meninggal: ')
-
-        if new_data[0][x] != old_data[0][x]:
-            dev = int(new_data[0][x].replace('.', '')) - int(old_data[0][x].replace('.', ''))
-            new_case.append(dev)
-            old_data[0][x] = new_data[0][x]
-            twit.append(new_data[0][x] + ' (+' + str(dev) + ')\n')
-        else:
-            twit.append(new_data[0][x] + '\n')
-
-    twit.append('\nSumber: https://kemkes.go.id/')
-    separator = ''
-    final_twit = separator.join(twit)
-
-    daily_case_graph(new_case)
-    store_old_data(old_data)
-    image = api.media_upload(filename = "img/graph1.png")
-    api.update_status(final_twit, media_ids = [image.media_id])
-    print("Berhasil twit data baru!")
-
-def daily_case_graph(new_case):
-    date = datetime.now().strftime('%Y-%m-%d')
-    mydb.execute("INSERT INTO daily_case VALUES('" + str(date) + "'," + str(new_case[0]) + "," + str(new_case[1]) + "," + str(new_case[2]) + ")")
-    db.commit()
-
-    df = pandas.read_sql("SELECT * FROM daily_case", db)
-    df['date'] = pandas.to_datetime(df['date'])
-    pyplot.figure(num=None, figsize=(15, 8), dpi=80)
-    pyplot.plot(df['date'],df['positive'])
-    pyplot.plot(df['date'],df['cured'])
-    pyplot.plot(df['date'],df['death'])
-    pyplot.title("Kasus per Hari")
-    pyplot.grid(True)
-    pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 14})
-    pyplot.savefig('img/graph1.png', bbox_inches='tight')
-
-def scraping_article(old_article):
-    result = requests.get('https://covid19.go.id/p/hoax-buster')
-    src = result.content
-    soup = BeautifulSoup(src, 'html.parser')
-
-    check = False
-    i = 0
-    new_article = []
-
-    while not check:
-        link = soup.find_all("a", class_="text-color-dark")[i]
-        if link.attrs['href'] == old_article[0][1]:
-            check = True
-        else:
-            article = []
-            article.append(link.text)
-            article.append(link.attrs['href'])
-            new_article.append(article)
-        i += 1
-
-    return new_article
-
-def retrieve_old_article():
-    mydb.execute('SELECT * FROM hoax_buster WHERE id = 1')
-    fetch = mydb.fetchall()
-    old_article = [list(i) for i in fetch]
-    return old_article
-
-def store_old_article(article):
-    mydb.execute("DELETE FROM hoax_buster")
-    mydb.execute("ALTER TABLE hoax_buster AUTO_INCREMENT=1;")
-    mydb.execute("INSERT INTO hoax_buster VALUES('" + article[0][0] + "','" + article[0][1] + "', 0)")
-    db.commit()
-
-def scraping_news(old_news):
-    result = requests.get('https://covid19.go.id/p/berita')
-    src = result.content
-    soup = BeautifulSoup(src, 'html.parser')
-
-    check = False
-    i = 0
-    new_news = []
-
-    while not check:
-        link = soup.find_all("a", class_="text-color-dark")[i]
-        if link.attrs['href'] == old_news[0][1]:
-            check = True
-        else:
-            if 'infografis' not in link.text.lower():
-                news = []
-                news.append(link.text)
-                news.append(link.attrs['href'])
-                new_news.append(news)
-        i += 1
-
-    return new_news
-
-def retrieve_old_news():
-    mydb.execute('SELECT * FROM berita')
-    fetch = mydb.fetchall()
-    old_news = [list(i) for i in fetch]
-    return old_news
-
-def store_old_news(news):
-    mydb.execute("DELETE FROM berita")
-    mydb.execute("INSERT INTO berita VALUES('" + news[0][0] + "','" + news[0][1] + "')")
-    db.commit()
+#---END OF HOSPITAL---
 
 def reply():
     print('Mengambil data...')
-    new_data = scraping_data()
-    old_data = retrieve_old_data()
+    new_case = scraping_case()
+    old_case = get_old_case()
 
     for x in range(0,3):
-        if new_data[0][x] != old_data[0][x]:
-            twit_data(old_data, new_data)
+        if new_case[0][x] != old_case[0][x]:
+            twit_case(old_case, new_case)
             break
     
-    old_article = retrieve_old_article()
-    new_article = scraping_article(old_article)
+    article_tables = ['hoax', 'berita']
+    for table in article_tables:
+        old_article = get_old_article(table)
+        new_article = scraping_article(old_article, table)
     
-    if new_article:
-        print("Mendapatkan artikel baru...")
-        store_old_article(new_article)
-        for i in range(0, len(new_article)):
-            api.update_status("#HoaxBuster\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
-            print("Berhasil twit artikel baru!")
+        if new_article:
+            print("Mendapatkan artikel baru...")
+            set_old_article(new_article, table)
+            for i in range(0, len(new_article)):
+                if table == 'hoax':
+                    api.update_status("#HoaxBuster\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
+                    print("Berhasil twit artikel baru!")
+                else:
+                    api.update_status("#BeritaTerkini\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
+                    print("Berhasil twit berita baru!")
 
-    old_news = retrieve_old_news()
-    new_news = scraping_news(old_news)
-
-    if new_news:
-        print("Mendapatkan berita baru...")
-        store_old_news(new_news)
-        for i in range(0, len(new_news)):
-            api.update_status("#BeritaTerkini\n" + new_news[i][0] + "\n\nSelengkapnya: " + new_news[i][1])
-            print("Berhasil twit berita baru!")
-        
-    last_id = retrieve_last_id()
+    last_id = get_last_id()
     mentions = api.mentions_timeline(last_id[0][0], tweet_mode='extended')
     for mention in reversed(mentions):
         last_id[0][0] = mention.id
-        store_last_id(last_id)
+        set_last_id(last_id)
         if '#kasusindo' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + new_data[0][0] + "\nSembuh: " + new_data[0][1] + '\nMeninggal: ' + new_data[0][2] +  "\n\nSumber: https://kemkes.go.id/", mention.id)
+            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + new_case[0][0] + "\nSembuh: " + new_case[0][1] + '\nMeninggal: ' + new_case[0][2] +  "\n\nSumber: https://kemkes.go.id/", mention.id)
             print("Berhasil membalas twit!")
         if '#gejala' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
