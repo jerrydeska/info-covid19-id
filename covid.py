@@ -86,18 +86,18 @@ def twit_case(old_case, new_case):
 
         if new_case[0][x] != old_case[0][x]:
             dev = int(new_case[0][x].replace('.', '')) - int(old_case[0][x].replace('.', ''))
-            today_case.append(dev)
-            old_case[0][x] = new_case[0][x]
             twit.append(new_case[0][x] + ' (+' + str(dev) + ')\n')
+            today_case.append(dev)
         else:
             twit.append(new_case[0][x] + '\n')
+            today_case.append(0)
 
     twit.append('\nSumber: https://kemkes.go.id/')
     separator = ''
     final_twit = separator.join(twit)
 
     daily_case_graph(today_case)
-    set_old_case(old_case)
+    set_old_case(new_case)
     image = api.media_upload(filename = "img/graph1.png")
     api.update_status(final_twit, media_ids = [image.media_id])
     print("Berhasil twit kasus baru!")
