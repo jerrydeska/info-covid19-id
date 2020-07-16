@@ -136,8 +136,10 @@ def set_old_article(article, table):
 def scraping_article(old_article, table):
     if table == 'hoax':
         result = requests.get('https://covid19.go.id/p/hoax-buster')
-    else:
+    elif table == 'berita':
         result = requests.get('https://covid19.go.id/p/berita')
+    else:
+        result = requests.get('https://covid19.go.id/p/protokol')
         
     src = result.content
     soup = BeautifulSoup(src, 'html.parser')
@@ -151,7 +153,9 @@ def scraping_article(old_article, table):
         if link.attrs['href'] == old_article[0][1]:
             check = True
         else:
-            if table == 'berita' and 'infografis' not in link.text.lower() or table == 'hoax':
+            if table == 'berita' and 'infografis' in link.text.lower():
+                pass
+            else:
                 article = []
                 article.append(link.text)
                 article.append(link.attrs['href'])
@@ -198,7 +202,7 @@ def reply():
             twit_case(old_case, new_case)
             break
     
-    article_tables = ['hoax', 'berita']
+    article_tables = ['hoax', 'berita', 'protokol']
     for table in article_tables:
         old_article = get_old_article(table)
         new_article = scraping_article(old_article, table)
@@ -210,9 +214,12 @@ def reply():
                 if table == 'hoax':
                     api.update_status("#HoaxBuster\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
                     print("Berhasil twit artikel baru!")
-                else:
+                elif table == 'berita':
                     api.update_status("#BeritaTerkini\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
                     print("Berhasil twit berita baru!")
+                else:
+                    api.update_status("#Protokol\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
+                    print("Berhasil twit protokol baru!")
 
     last_id = get_last_id()
     mentions = api.mentions_timeline(last_id[0][0], tweet_mode='extended')
