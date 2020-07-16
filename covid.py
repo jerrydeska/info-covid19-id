@@ -74,7 +74,7 @@ def scraping_case():
 def twit_case(old_case, new_case):
     print("Mendapatkan kasus baru...")
     twit = []
-    new_cases = []
+    today_case = []
     twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
     for x in range(0,3):
         if x == 0:
@@ -86,7 +86,7 @@ def twit_case(old_case, new_case):
 
         if new_case[0][x] != old_case[0][x]:
             dev = int(new_case[0][x].replace('.', '')) - int(old_case[0][x].replace('.', ''))
-            new_cases.append(dev)
+            today_case.append(dev)
             old_case[0][x] = new_case[0][x]
             twit.append(new_case[0][x] + ' (+' + str(dev) + ')\n')
         else:
@@ -96,15 +96,15 @@ def twit_case(old_case, new_case):
     separator = ''
     final_twit = separator.join(twit)
 
-    daily_case_graph(new_cases)
+    daily_case_graph(today_case)
     set_old_case(old_case)
     image = api.media_upload(filename = "img/graph1.png")
     api.update_status(final_twit, media_ids = [image.media_id])
     print("Berhasil twit kasus baru!")
 
-def daily_case_graph(new_case):
+def daily_case_graph(today_case):
     date = datetime.now().strftime('%Y-%m-%d')
-    mydb.execute("INSERT INTO daily_case VALUES('" + str(date) + "'," + str(new_case[0]) + "," + str(new_case[1]) + "," + str(new_case[2]) + ")")
+    mydb.execute("INSERT INTO daily_case VALUES('" + str(date) + "'," + str(today_case[0]) + "," + str(today_case[1]) + "," + str(today_case[2]) + ")")
     db.commit()
 
     df = pandas.read_sql("SELECT * FROM daily_case", db)
