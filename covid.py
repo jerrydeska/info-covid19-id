@@ -199,13 +199,13 @@ def reply():
     articles = [['hoax', '#HoaxBuster\n', 'hoax-buster'], ['berita', '#BeritaTerkini\n', 'berita'], ['protokol', '#Protokol\n', 'protokol']]
     for i in range(0, len(articles)):
         old_article = get_old_article(articles[i][0])
-        new_articles = scraping_article(old_article, articles[i][0], articles[i][2])
+        new_article = scraping_article(old_article, articles[i][0], articles[i][2])
     
-        if new_articles:
+        if new_article:
             print("Mendapatkan artikel baru...")
-            for new_article in new_articles:
-                set_old_article(new_article, articles[i][0])
-                api.update_status(articles[i][1] + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
+            set_old_article(new_article, articles[i][0])
+            for x in range(0, len(new_article)):
+                api.update_status(articles[i][1] + new_article[x][0] + "\n\nSelengkapnya: " + new_article[x][1])
                 print("Berhasil twit artikel baru!")
 
     last_id = get_last_id()
