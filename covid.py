@@ -204,9 +204,8 @@ def reply():
         if new_article:
             print("Mendapatkan artikel baru...")
             set_old_article(new_article, articles[i][0])
-            for i in range(0, len(new_article)):
-                api.update_status(articles[i][1] + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
-                print("Berhasil twit artikel baru!")
+            api.update_status(articles[i][1] + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
+            print("Berhasil twit artikel baru!")
 
     last_id = get_last_id()
     mentions = api.mentions_timeline(last_id[0][0], tweet_mode='extended')
