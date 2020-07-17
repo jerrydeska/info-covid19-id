@@ -133,14 +133,8 @@ def set_old_article(article, table):
     mydb.execute("INSERT INTO " + table + " VALUES('" + article[0][0] + "','" + article[0][1] + "')")
     db.commit()
 
-def scraping_article(old_article, table):
-    if table == 'hoax':
-        result = requests.get('https://covid19.go.id/p/hoax-buster')
-    elif table == 'berita':
-        result = requests.get('https://covid19.go.id/p/berita')
-    else:
-        result = requests.get('https://covid19.go.id/p/protokol')
-        
+def scraping_article(old_article, table, href):
+    result = requests.get('https://covid19.go.id/p/' + href)
     src = result.content
     soup = BeautifulSoup(src, 'html.parser')
 
@@ -202,24 +196,17 @@ def reply():
             twit_case(old_case, new_case)
             break
     
-    article_tables = ['hoax', 'berita', 'protokol']
-    for table in article_tables:
-        old_article = get_old_article(table)
-        new_article = scraping_article(old_article, table)
+    articles = [['hoax', '#HoaxBuster\n', 'hoax-buster'], ['berita', '#BeritaTerkini\n', 'berita'], ['protokol', '#Protokol\n', 'protokol']]
+    for i in range(0, len(articles)):
+        old_article = get_old_article(articles[i][0])
+        new_article = scraping_article(old_article, articles[i][0], articles[i][2])
     
         if new_article:
             print("Mendapatkan artikel baru...")
-            set_old_article(new_article, table)
+            set_old_article(new_article, articles[i][0])
             for i in range(0, len(new_article)):
-                if table == 'hoax':
-                    api.update_status("#HoaxBuster\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
-                    print("Berhasil twit artikel baru!")
-                elif table == 'berita':
-                    api.update_status("#BeritaTerkini\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
-                    print("Berhasil twit berita baru!")
-                else:
-                    api.update_status("#Protokol\n" + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
-                    print("Berhasil twit protokol baru!")
+                api.update_status(articles[i][1] + new_article[i][0] + "\n\nSelengkapnya: " + new_article[i][1])
+                print("Berhasil twit artikel baru!")
 
     last_id = get_last_id()
     mentions = api.mentions_timeline(last_id[0][0], tweet_mode='extended')
