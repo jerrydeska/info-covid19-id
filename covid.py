@@ -78,11 +78,11 @@ def check_indo_case():
 
             twit.append("#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n")
             twit.append("Positif: {:,}".format(src['update']['total']['jumlah_positif']).replace(',','.'))
-            twit.append(" (+" + today_positive + ")")
+            twit.append(" (+" + today_positive + ")\n")
             twit.append("Sembuh: {:,}".format(src['update']['total']['jumlah_sembuh']).replace(',','.'))
-            twit.append(" (+" + today_cured + ")")
+            twit.append(" (+" + today_cured + ")\n")
             twit.append("Meninggal: {:,}".format(src['update']['total']['jumlah_meninggal']).replace(',','.'))
-            twit.append(" (+" + today_death + ")")
+            twit.append(" (+" + today_death + ")\n")
             twit.append('\nSumber: https://covid19.go.id/')
             
             indo_case_graph(today_case)
@@ -217,7 +217,7 @@ def reply():
             death = src['update']['total']['jumlah_meninggal']
 
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + positive + "\nSembuh: " + cured + '\nMeninggal: ' + death +  "\n\nSumber: https://covid19.go.id/", mention.id)
+            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + "\nSembuh: " + cured + '\nMeninggal: ' + death +  "\n\nSumber: https://covid19.go.id/", mention.id)
             print("Berhasil membalas twit!")
         if '#gejala' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
