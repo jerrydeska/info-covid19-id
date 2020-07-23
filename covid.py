@@ -212,9 +212,9 @@ def reply():
             result = requests.get('https://data.covid19.go.id/public/api/update.json')
             src = result.json()
 
-            positive = src['update']['total']['jumlah_positif']
-            cured = src['update']['total']['jumlah_sembuh']
-            death = src['update']['total']['jumlah_meninggal']
+            positive = "{:,}".format(src['update']['total']['jumlah_positif']).replace(',','.')
+            cured = "{:,}".format(src['update']['total']['jumlah_sembuh']).replace(',','.')
+            death = "{:,}".format(src['update']['total']['jumlah_meninggal']).replace(',','.')
 
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
             api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + "\nSembuh: " + cured + '\nMeninggal: ' + death +  "\n\nSumber: https://covid19.go.id/", mention.id)
