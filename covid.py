@@ -78,11 +78,11 @@ def check_indo_case():
 
             twit.append("#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n")
             twit.append("Positif: {:,}".format(src['update']['total']['jumlah_positif']).replace(',','.'))
-            twit.append(" (+" + today_positive + ")\n")
+            twit.append(" (+" + str(today_positive) + ")\n")
             twit.append("Sembuh: {:,}".format(src['update']['total']['jumlah_sembuh']).replace(',','.'))
-            twit.append(" (+" + today_cured + ")\n")
+            twit.append(" (+" + str(today_cured) + ")\n")
             twit.append("Meninggal: {:,}".format(src['update']['total']['jumlah_meninggal']).replace(',','.'))
-            twit.append(" (+" + today_death + ")\n")
+            twit.append(" (+" + str(today_death) + ")\n")
             twit.append('\nSumber: https://covid19.go.id/')
             
             indo_case_graph(today_case)
