@@ -51,7 +51,7 @@ def get_check():
     return case_date
 
 def set_check_indo(bool_check):
-    mydb.execute('UPDATE check_case SET indo_case=' + bool_check)
+    mydb.execute('UPDATE check_case SET indo_case=' + str(bool_check))
     db.commit()
 
 #---END OF INDO CHECK---
