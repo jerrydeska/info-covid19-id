@@ -27,7 +27,7 @@ auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
 
-#---ID---
+#---TWITTER ID---
 
 def get_last_id():
     mydb.execute('SELECT * FROM mention_id')
@@ -40,69 +40,65 @@ def set_last_id(last_id):
     mydb.execute("INSERT INTO mention_id VALUES('" + str(last_id[0][0]) + "')")
     db.commit() 
 
-#---END OF ID----
+#---END OF TWITTER ID----
 
-#---CASE---
+#---INDO CHECK---
 
-def get_old_case():
-    mydb.execute('SELECT * FROM old_case')
+def get_check():
+    mydb.execute('SELECT * FROM check_case')
     fetch = mydb.fetchall()
-    old_case = [list(i) for i in fetch]
-    return old_case
+    case_date = [list(i) for i in fetch]
+    return case_date
 
-def set_old_case(case):
-    mydb.execute("DELETE FROM old_case")
-    mydb.execute("INSERT INTO old_case VALUES('" + case[0][0] + "','" + case[0][1] + "','" + case[0][2] + "')")
+def set_check_indo(bool_check):
+    mydb.execute('UPDATE check_case SET indo_case=' + str(bool_check))
     db.commit()
 
-def scraping_case():
-    result = requests.get('https://kemkes.go.id/')
-    src = result.content
-    soup = BeautifulSoup(src, 'lxml')
-    links = soup.find_all("td")
-    case = []
+#---END OF INDO CHECK---
 
-    for link in links:
-        if "case" in link.attrs['class']:
-            case.append(link.text)
-            if len(case) == 3:
-                break
+#---INDO CASE---
 
-    new_case = [case]
-    return new_case
+def check_indo_case():
+    result = requests.get('https://data.covid19.go.id/public/api/update.json')
+    src = result.json()
 
-def twit_case(old_case, new_case):
-    print("Mendapatkan kasus baru...")
+    final_twit = []
     twit = []
-    today_case = []
-    twit.append('#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n')
-    for x in range(0,3):
-        if x == 0:
-            twit.append('Jumlah Positif: ')
-        elif x == 1:
-            twit.append('Sembuh: ')
-        elif x == 2:
-            twit.append('Meninggal: ')
 
-        if new_case[0][x] != old_case[0][x]:
-            dev = int(new_case[0][x].replace('.', '')) - int(old_case[0][x].replace('.', ''))
-            twit.append(new_case[0][x] + ' (+' + str(dev) + ')\n')
-            today_case.append(dev)
+    check = get_check()
+    date = datetime.now().strftime('%Y-%m-%d')
+    if date == src['update']['penambahan']['tanggal']:
+        if check[0][0]:
+            pass
         else:
-            twit.append(new_case[0][x] + '\n')
-            today_case.append(0)
+            today_positive = src['update']['penambahan']['jumlah_positif']
+            today_cured = src['update']['penambahan']['jumlah_sembuh']
+            today_death = src['update']['penambahan']['jumlah_meninggal']
+            today_case = [today_positive, today_cured, today_death]
 
-    twit.append('\nSumber: https://kemkes.go.id/')
-    separator = ''
-    final_twit = separator.join(twit)
+            twit.append("#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n")
+            twit.append("Positif: {:,}".format(src['update']['total']['jumlah_positif']).replace(',','.'))
+            twit.append(" (+" + str(today_positive) + ")\n")
+            twit.append("Sembuh: {:,}".format(src['update']['total']['jumlah_sembuh']).replace(',','.'))
+            twit.append(" (+" + str(today_cured) + ")\n")
+            twit.append("Meninggal: {:,}".format(src['update']['total']['jumlah_meninggal']).replace(',','.'))
+            twit.append(" (+" + str(today_death) + ")\n")
+            twit.append('\nSumber: https://covid19.go.id/')
+            
+            indo_case_graph(today_case)
+            separator = ''
+            final_twit = separator.join(twit)
 
-    daily_case_graph(today_case)
-    set_old_case(new_case)
-    image = api.media_upload(filename = "img/graph1.png")
-    api.update_status(final_twit, media_ids = [image.media_id])
-    print("Berhasil twit kasus baru!")
+            set_check_indo(1)
+    else:
+        if not check[0][0]:
+            pass
+        else:
+            set_check_indo(0)
 
-def daily_case_graph(today_case):
+    return final_twit
+
+def indo_case_graph(today_case):
     date = datetime.now().strftime('%Y-%m-%d')
     mydb.execute("INSERT INTO daily_case VALUES('" + str(date) + "'," + str(today_case[0]) + "," + str(today_case[1]) + "," + str(today_case[2]) + ")")
     db.commit()
@@ -118,7 +114,7 @@ def daily_case_graph(today_case):
     pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 14})
     pyplot.savefig('img/graph1.png', bbox_inches='tight')
 
-#---END OF CASE---
+#---END OF INDO CASE---
 
 #---ARTICLE---
 
@@ -188,14 +184,13 @@ def rujukan(mention):
 
 def reply():
     print('Mengambil data...')
-    new_case = scraping_case()
-    old_case = get_old_case()
-
-    for x in range(0,3):
-        if new_case[0][x] != old_case[0][x]:
-            twit_case(old_case, new_case)
-            break
     
+    final_twit = check_indo_case()
+    if final_twit:
+        graph1 = api.media_upload(filename = "img/graph1.png")
+        api.update_status(final_twit, media_ids = [graph1.media_id])
+        print("Berhasil twit kasus baru!")
+
     articles = [['hoax', '#HoaxBuster\n', 'hoax-buster'], ['berita', '#BeritaTerkini\n', 'berita'], ['protokol', '#Protokol\n', 'protokol']]
     for i in range(0, len(articles)):
         old_article = get_old_article(articles[i][0])
@@ -214,8 +209,15 @@ def reply():
         last_id[0][0] = mention.id
         set_last_id(last_id)
         if '#kasusindo' in mention.full_text.lower():
+            result = requests.get('https://data.covid19.go.id/public/api/update.json')
+            src = result.json()
+
+            positive = "{:,}".format(src['update']['total']['jumlah_positif']).replace(',','.')
+            cured = "{:,}".format(src['update']['total']['jumlah_sembuh']).replace(',','.')
+            death = "{:,}".format(src['update']['total']['jumlah_meninggal']).replace(',','.')
+
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nJumlah Positif: ' + new_case[0][0] + "\nSembuh: " + new_case[0][1] + '\nMeninggal: ' + new_case[0][2] +  "\n\nSumber: https://kemkes.go.id/", mention.id)
+            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + "\nSembuh: " + cured + '\nMeninggal: ' + death +  "\n\nSumber: https://covid19.go.id/", mention.id)
             print("Berhasil membalas twit!")
         if '#gejala' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
