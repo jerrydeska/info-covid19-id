@@ -323,9 +323,7 @@ def reply():
                     api.update_status('@' + mention.user.screen_name + ' Kasus Provinsi ' + prov_name + ' (' + date + ')\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
                     print("Berhasil membalas twit!")
                     break
-                else:
-                    print("Provinsi tidak ditemukan!")
-            
+                    
 while True:
     reply()
     time.sleep(10)
