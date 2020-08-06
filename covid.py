@@ -281,7 +281,7 @@ def reply():
             today_death = "{:,}".format(src['update']['penambahan']['jumlah_meninggal'].replace(',','.'))
 
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            api.update_status('@' + mention.user.screen_name + 'Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + '(+' + today_positive + ')\nSembuh: ' + cured + '(+' + today_cured + ')\nMeninggal: ' + death + '(+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
+            api.update_status('@' + mention.user.screen_name + 'Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
             print("Berhasil membalas twit!")
         if '#gejala' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
@@ -304,7 +304,8 @@ def reply():
                 api.update_status('@' + mention.user.screen_name + ' ' + final_twit, mention.id)
                 print("Berhasil membalas twit!")
             else:
-                print("Provinsi tidak ada!")
+                api.update_status('@' + mention.user.screen_name + ' Provinsi tidak ditemukan, pastikan nama provinsi ditulis dengan lengkap dan benar')
+                print("Provinsi tidak ditemukan!")
         if '#kasusprov' in mention.full_text.lower():
             result = requests.get('https://data.covid19.go.id/public/api/prov.json')
             src = result.json()
@@ -320,8 +321,12 @@ def reply():
                     today_death = "{:,}".format(data['penambahan']['meninggal']).replace(',','.')
                     prov_name = data['key']
                     
-                    api.update_status('@' + mention.user.screen_name + ' Kasus Provinsi ' + prov_name + ' (' + date + ')\n\nPositif: ' + positive + '(+' + today_positive + ')\nSembuh: ' + cured + '(+' + today_cured + ')\nMeninggal: ' + death + '(+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
+                    api.update_status('@' + mention.user.screen_name + ' Kasus Provinsi ' + prov_name + ' (' + date + ')\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
+                    print("Berhasil membalas twit!")
                     break
+                else:
+                    api.update_status('@' + mention.user.screen_name + ' Provinsi tidak ditemukan, pastikan nama provinsi ditulis dengan lengkap dan benar')
+                    print("Provinsi tidak ditemukan!")
             
 while True:
     reply()
