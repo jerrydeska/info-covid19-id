@@ -276,9 +276,9 @@ def reply():
             positive = "{:,}".format(src['update']['total']['jumlah_positif']).replace(',','.')
             cured = "{:,}".format(src['update']['total']['jumlah_sembuh']).replace(',','.')
             death = "{:,}".format(src['update']['total']['jumlah_meninggal']).replace(',','.')
-            today_positive = "{:,}".src['update']['penambahan']['jumlah_positif'].replace(',','.')
-            today_cured = "{:,}".src['update']['penambahan']['jumlah_sembuh'].replace(',','.')
-            today_death = "{:,}".src['update']['penambahan']['jumlah_meninggal'].replace(',','.')
+            today_positive = "{:,}".format(src['update']['penambahan']['jumlah_positif'].replace(',','.'))
+            today_cured = "{:,}".format(src['update']['penambahan']['jumlah_sembuh'].replace(',','.'))
+            today_death = "{:,}".format(src['update']['penambahan']['jumlah_meninggal'].replace(',','.'))
 
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
             api.update_status('@' + mention.user.screen_name + 'Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + '(+' + today_positive + ')\nSembuh: ' + cured + '(+' + today_cured + ')\nMeninggal: ' + death + '(+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
@@ -317,7 +317,7 @@ def reply():
                     death = "{:,}".format(data['jumlah_meninggal']).replace(',','.')
                     today_positive = "{:,}".format(data['penambahan']['positif']).replace(',','.')
                     today_cured = "{:,}".format(data['penambahan']['sembuh']).replace(',','.')
-                    today_death = "{:,}".format(data['penambahan']['peninggal']).replace(',','.')
+                    today_death = "{:,}".format(data['penambahan']['meninggal']).replace(',','.')
                     prov_name = data['key']
                     
                     api.update_status('@' + mention.user.screen_name + ' Kasus Provinsi ' + prov_name + ' (' + date + ')\n\nPositif: ' + positive + '(+' + today_positive + ')\nSembuh: ' + cured + '(+' + today_cured + ')\nMeninggal: ' + death + '(+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
