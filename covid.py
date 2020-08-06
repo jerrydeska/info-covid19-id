@@ -304,7 +304,6 @@ def reply():
                 api.update_status('@' + mention.user.screen_name + ' ' + final_twit, mention.id)
                 print("Berhasil membalas twit!")
             else:
-                api.update_status('@' + mention.user.screen_name + ' Provinsi tidak ditemukan, pastikan nama provinsi ditulis dengan lengkap dan benar')
                 print("Provinsi tidak ditemukan!")
         if '#kasusprov' in mention.full_text.lower():
             result = requests.get('https://data.covid19.go.id/public/api/prov.json')
@@ -325,7 +324,6 @@ def reply():
                     print("Berhasil membalas twit!")
                     break
                 else:
-                    api.update_status('@' + mention.user.screen_name + ' Provinsi tidak ditemukan, pastikan nama provinsi ditulis dengan lengkap dan benar')
                     print("Provinsi tidak ditemukan!")
             
 while True:
