@@ -149,7 +149,7 @@ def check_prov_case():
     return final_twit
 
 def prov_case_graph(src):
-    date = datetime.now().strftime('%d-%m-%Y')
+    date = src['last_date']
 
     positive, cured, death, prov_name = [], [], [], []
     for data in src['list_data']:
@@ -304,6 +304,7 @@ def reply():
                 api.update_status('@' + mention.user.screen_name + ' ' + final_twit, mention.id)
                 print("Berhasil membalas twit!")
             else:
+                api.update_status('@' + mention.user.screen_name + ' Provinsi tidak ditemukan, pastikan nama provinsi ditulis dengan lengkap dan benar')
                 print("Provinsi tidak ditemukan!")
         if '#kasusprov' in mention.full_text.lower():
             result = requests.get('https://data.covid19.go.id/public/api/prov.json')
@@ -311,7 +312,7 @@ def reply():
 
             for data in src['list_data']:
                 if data['key'].lower() in mention.full_text.lower():
-                    date = datetime.now().strftime('%d-%m-%Y')
+                    date = src['last_date']
                     positive = "{:,}".format(data['jumlah_kasus']).replace(',','.')
                     cured = "{:,}".format(data['jumlah_sembuh']).replace(',','.')
                     death = "{:,}".format(data['jumlah_meninggal']).replace(',','.')
@@ -324,6 +325,7 @@ def reply():
                     print("Berhasil membalas twit!")
                     break
                 else:
+                    api.update_status('@' + mention.user.screen_name + ' Provinsi tidak ditemukan, pastikan nama provinsi ditulis dengan lengkap dan benar')
                     print("Provinsi tidak ditemukan!")
             
 while True:
