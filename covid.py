@@ -134,14 +134,14 @@ def check_prov_case():
     check = get_check()
     date = datetime.now().strftime('%Y-%m-%d')
     if date == src['last_date']:
-        if check[0][0]:
+        if check[0][1]:
             pass
         else:
             final_twit = "#UPDATE\n\nKasus per provinsi. Untuk melihat detail per-provinsi, mention akun ini dengan hashtag #kasusprov + nama provinsi (Cth: #kasusprov DKI Jakarta)"
             prov_case_graph(src)
             set_check_prov(1)
     else:
-        if not check[0][0]:
+        if not check[0][1]:
             pass
         else:
             set_check_prov(0)
@@ -159,9 +159,9 @@ def prov_case_graph(src):
         prov_name.append(data['key'])
 
     pyplot.figure(num=None, figsize=(15, 8), dpi=80)
-    pyplot.bar(prov_name,positive, align='center', width=0.5)
-    pyplot.bar(prov_name,cured, align='center', width=0.5)
-    pyplot.bar(prov_name,death, align='center', width=0.5)
+    pyplot.bar(prov_name, positive)
+    pyplot.bar(prov_name, cured)
+    pyplot.bar(prov_name, death)
     pyplot.subplots_adjust(bottom=0.23, left=0.05, right=0.98, top=0.95)
     pyplot.title("Kasus per Provinsi (" + date + ")")
     pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 14})
@@ -281,7 +281,7 @@ def reply():
             today_death = "{:,}".format(src['update']['penambahan']['jumlah_meninggal'].replace(',','.'))
 
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            api.update_status('@' + mention.user.screen_name + 'Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
+            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
             print("Berhasil membalas twit!")
         if '#gejala' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
@@ -323,7 +323,7 @@ def reply():
                     api.update_status('@' + mention.user.screen_name + ' Kasus Provinsi ' + prov_name + ' (' + date + ')\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
                     print("Berhasil membalas twit!")
                     break
-                    
+            
 while True:
     reply()
     time.sleep(10)
