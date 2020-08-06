@@ -54,6 +54,10 @@ def set_check_indo(bool_check):
     mydb.execute('UPDATE check_case SET indo_case=' + str(bool_check))
     db.commit()
 
+def set_check_prov(bool_check):
+    mydb.execute('UPDATE check_case SET prov_case=' + str(bool_check))
+    db.commit()
+
 #---END OF INDO CHECK---
 
 #---INDO CASE---
@@ -71,18 +75,21 @@ def check_indo_case():
         if check[0][0]:
             pass
         else:
+            positive = src['update']['total']['jumlah_positif']
+            cured = src['update']['total']['jumlah_sembuh']
+            death = src['update']['total']['jumlah_meninggal']
             today_positive = src['update']['penambahan']['jumlah_positif']
             today_cured = src['update']['penambahan']['jumlah_sembuh']
             today_death = src['update']['penambahan']['jumlah_meninggal']
             today_case = [today_positive, today_cured, today_death]
 
             twit.append("#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n")
-            twit.append("Positif: {:,}".format(src['update']['total']['jumlah_positif']).replace(',','.'))
-            twit.append(" (+" + str(today_positive) + ")\n")
-            twit.append("Sembuh: {:,}".format(src['update']['total']['jumlah_sembuh']).replace(',','.'))
-            twit.append(" (+" + str(today_cured) + ")\n")
-            twit.append("Meninggal: {:,}".format(src['update']['total']['jumlah_meninggal']).replace(',','.'))
-            twit.append(" (+" + str(today_death) + ")\n")
+            twit.append("Positif: {:,}".format(positive).replace(',','.'))
+            twit.append(" (+ {:,})\n".format(today_positive).replace(',','.'))
+            twit.append("Sembuh: {:,}".format(cured).replace(',','.'))
+            twit.append(" (+ {:,})\n".format(today_cured).replace(',','.'))
+            twit.append("Meninggal: {:,}".format(death).replace(',','.'))
+            twit.append(" (+ {:,})\n".format(today_death).replace(',','.'))
             twit.append('\nSumber: https://covid19.go.id/')
             
             indo_case_graph(today_case)
@@ -115,6 +122,54 @@ def indo_case_graph(today_case):
     pyplot.savefig('img/graph1.png', bbox_inches='tight')
 
 #---END OF INDO CASE---
+
+#---PROV CASE---
+
+def check_prov_case():
+    result = requests.get('https://data.covid19.go.id/public/api/prov.json')
+    src = result.json()
+
+    final_twit = ""
+
+    check = get_check()
+    date = datetime.now().strftime('%Y-%m-%d')
+    if date == src['last_date']:
+        if check[0][0]:
+            pass
+        else:
+            final_twit = "#UPDATE\n\nKasus per provinsi. Untuk melihat detail per-provinsi, mention akun ini dengan hashtag #kasusprov + nama provinsi (Cth: #kasusprov DKI Jakarta)"
+            prov_case_graph(src)
+            set_check_prov(1)
+    else:
+        if not check[0][0]:
+            pass
+        else:
+            set_check_prov(0)
+    
+    return final_twit
+
+def prov_case_graph(src):
+    date = datetime.now().strftime('%d-%m-%Y')
+
+    positive, cured, death, prov_name = [], [], [], []
+    for data in src['list_data']:
+        positive.append(data['jumlah_kasus'])
+        cured.append(data['jumlah_sembuh'])
+        death.append(data['jumlah_meninggal'])
+        prov_name.append(data['key'])
+
+    pyplot.figure(num=None, figsize=(15, 8), dpi=80)
+    pyplot.bar(prov_name,positive, align='center', width=0.5)
+    pyplot.bar(prov_name,cured, align='center', width=0.5)
+    pyplot.bar(prov_name,death, align='center', width=0.5)
+    pyplot.subplots_adjust(bottom=0.23, left=0.05, right=0.98, top=0.95)
+    pyplot.title("Kasus per Provinsi (" + date + ")")
+    pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 14})
+    pyplot.grid(True, axis='y')
+    pyplot.xticks(rotation=45, ha='right')
+    pyplot.savefig('img/graph2.png', bbox_inches='tight')
+
+#---END OF PROV CASE---
 
 #---ARTICLE---
 
@@ -189,7 +244,13 @@ def reply():
     if final_twit:
         graph1 = api.media_upload(filename = "img/graph1.png")
         api.update_status(final_twit, media_ids = [graph1.media_id])
-        print("Berhasil twit kasus baru!")
+        print("Berhasil twit kasus Indonesia baru!")
+
+    final_twit = check_prov_case()
+    if final_twit:
+        graph2 = api.media_upload(filename = "img/graph2.png")
+        api.update_status(final_twit, media_ids = [graph2.media_id])
+        print("Berhasil twit kasus Provinsi baru!")
 
     articles = [['hoax', '#HoaxBuster\n', 'hoax-buster'], ['berita', '#BeritaTerkini\n', 'berita'], ['protokol', '#Protokol\n', 'protokol']]
     for i in range(0, len(articles)):
@@ -215,9 +276,12 @@ def reply():
             positive = "{:,}".format(src['update']['total']['jumlah_positif']).replace(',','.')
             cured = "{:,}".format(src['update']['total']['jumlah_sembuh']).replace(',','.')
             death = "{:,}".format(src['update']['total']['jumlah_meninggal']).replace(',','.')
+            today_positive = "{:,}".src['update']['penambahan']['jumlah_positif'].replace(',','.')
+            today_cured = "{:,}".src['update']['penambahan']['jumlah_sembuh'].replace(',','.')
+            today_death = "{:,}".src['update']['penambahan']['jumlah_meninggal'].replace(',','.')
 
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + "\nSembuh: " + cured + '\nMeninggal: ' + death +  "\n\nSumber: https://covid19.go.id/", mention.id)
+            api.update_status('@' + mention.user.screen_name + 'Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + '(+' + today_positive + ')\nSembuh: ' + cured + '(+' + today_cured + ')\nMeninggal: ' + death + '(+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
             print("Berhasil membalas twit!")
         if '#gejala' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
@@ -241,7 +305,24 @@ def reply():
                 print("Berhasil membalas twit!")
             else:
                 print("Provinsi tidak ada!")
+        if '#kasusprov' in mention.full_text.lower():
+            result = requests.get('https://data.covid19.go.id/public/api/prov.json')
+            src = result.json()
 
+            for data in src['list_data']:
+                if data['key'].lower() in mention.full_text.lower():
+                    date = datetime.now().strftime('%d-%m-%Y')
+                    positive = "{:,}".format(data['jumlah_kasus']).replace(',','.')
+                    cured = "{:,}".format(data['jumlah_sembuh']).replace(',','.')
+                    death = "{:,}".format(data['jumlah_meninggal']).replace(',','.')
+                    today_positive = "{:,}".format(data['penambahan']['positif']).replace(',','.')
+                    today_cured = "{:,}".format(data['penambahan']['sembuh']).replace(',','.')
+                    today_death = "{:,}".format(data['penambahan']['peninggal']).replace(',','.')
+                    prov_name = data['key']
+                    
+                    api.update_status('@' + mention.user.screen_name + ' Kasus Provinsi ' + prov_name + ' (' + date + ')\n\nPositif: ' + positive + '(+' + today_positive + ')\nSembuh: ' + cured + '(+' + today_cured + ')\nMeninggal: ' + death + '(+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
+                    break
+            
 while True:
     reply()
     time.sleep(10)
