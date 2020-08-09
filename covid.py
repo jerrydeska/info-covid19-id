@@ -85,11 +85,11 @@ def check_indo_case():
 
             twit.append("#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n")
             twit.append("Positif: {:,}".format(positive).replace(',','.'))
-            twit.append(" (+ {:,})\n".format(today_positive).replace(',','.'))
+            twit.append(" (+{:,})\n".format(today_positive).replace(',','.'))
             twit.append("Sembuh: {:,}".format(cured).replace(',','.'))
-            twit.append(" (+ {:,})\n".format(today_cured).replace(',','.'))
+            twit.append(" (+{:,})\n".format(today_cured).replace(',','.'))
             twit.append("Meninggal: {:,}".format(death).replace(',','.'))
-            twit.append(" (+ {:,})\n".format(today_death).replace(',','.'))
+            twit.append(" (+{:,})\n".format(today_death).replace(',','.'))
             twit.append('\nSumber: https://covid19.go.id/')
             
             indo_case_graph(today_case)
@@ -137,7 +137,7 @@ def check_prov_case():
         if check[0][1]:
             pass
         else:
-            final_twit = "#UPDATE\n\nKasus per provinsi. Untuk melihat detail per-provinsi, mention akun ini dengan hashtag #kasusprov + nama provinsi (Cth: #kasusprov DKI Jakarta)\n\nSumber: https://covid19.go.id/"
+            final_twit = "#UPDATE\nKasus per provinsi. Untuk melihat detail per-provinsi, mention akun ini dengan hashtag #kasusprov + nama provinsi (Cth: #kasusprov DKI Jakarta)\n\nSumber: https://covid19.go.id/"
             prov_case_graph(src)
             set_check_prov(1)
     else:
