@@ -71,7 +71,7 @@ def check_indo_case():
 
     check = get_check()
     date = datetime.now().strftime('%Y-%m-%d')
-    if date == src['update']['penambahan']['tanggal']:
+    if date in src['update']['penambahan']['created']:
         if check[0][0]:
             pass
         else:
@@ -150,24 +150,26 @@ def check_prov_case():
 
 def prov_case_graph(src):
     date = src['last_date']
-
-    positive, cured, death, prov_name = [], [], [], []
+    
+    positif, sembuh, meninggal, nama_provinsi = [], [], [], []
     for data in src['list_data']:
-        positive.append(data['jumlah_kasus'])
-        cured.append(data['jumlah_sembuh'])
-        death.append(data['jumlah_meninggal'])
-        prov_name.append(data['key'])
+        positif.append(data['jumlah_kasus'])
+        sembuh.append(data['jumlah_sembuh'])
+        meninggal.append(data['jumlah_meninggal'])
+        nama_provinsi.append(data['key'])
 
     pyplot.figure(num=None, figsize=(15, 8), dpi=80)
-    pyplot.bar(prov_name, positive)
-    pyplot.bar(prov_name, cured)
-    pyplot.bar(prov_name, death)
-    pyplot.subplots_adjust(bottom=0.23, left=0.05, right=0.98, top=0.95)
+    elements = pyplot.barh(nama_provinsi, positif)
+    pyplot.barh(nama_provinsi, sembuh)
+    pyplot.barh(nama_provinsi, meninggal)
+    pyplot.subplots_adjust(left=0.16)
     pyplot.title("Kasus per Provinsi (" + date + ")")
     pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 14})
-    pyplot.grid(True, axis='y')
-    pyplot.xticks(rotation=45, ha='right')
-    pyplot.savefig('img/graph2.png', bbox_inches='tight')
+    pyplot.grid(True, axis='x')
+    pyplot.gca().invert_yaxis()
+    for elem in elements:
+        pyplot.text(elem.get_width() + 13,  elem.get_y() + 0.8, "{:.1f}".format(elem.get_width()/src['update']['total']['jumlah_positif'] * 100) + "%", fontsize=12)
+    pyplot.savefig('img/graph4.png', bbox_inches='tight')
 
 #---END OF PROV CASE---
 
