@@ -150,6 +150,9 @@ def check_prov_case():
 
 def prov_case_graph(src):
     date = src['last_date']
+
+    result = requests.get('https://data.covid19.go.id/public/api/update.json')
+    src2 = result.json()
     
     positif, sembuh, meninggal, nama_provinsi = [], [], [], []
     for data in src['list_data']:
@@ -168,7 +171,7 @@ def prov_case_graph(src):
     pyplot.grid(True, axis='x')
     pyplot.gca().invert_yaxis()
     for elem in elements:
-        pyplot.text(elem.get_width() + 13,  elem.get_y() + 0.8, "{:.1f}".format(elem.get_width()/src['update']['total']['jumlah_positif'] * 100) + "%", fontsize=12)
+        pyplot.text(elem.get_width() + 13,  elem.get_y() + 0.8, "{:.1f}".format(elem.get_width()/src2['update']['total']['jumlah_positif'] * 100) + "%", fontsize=12)
     pyplot.savefig('img/graph4.png', bbox_inches='tight')
 
 #---END OF PROV CASE---
