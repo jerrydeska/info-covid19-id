@@ -172,7 +172,7 @@ def prov_case_graph(src):
     pyplot.gca().invert_yaxis()
     for elem in elements:
         pyplot.text(elem.get_width() + 13,  elem.get_y() + 0.8, "{:.1f}".format(elem.get_width()/src2['update']['total']['jumlah_positif'] * 100) + "%", fontsize=12)
-    pyplot.savefig('img/graph4.png', bbox_inches='tight')
+    pyplot.savefig('img/graph2.png', bbox_inches='tight')
 
 #---END OF PROV CASE---
 
