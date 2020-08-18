@@ -167,7 +167,7 @@ def prov_case_graph(src):
     pyplot.barh(nama_provinsi, meninggal)
     pyplot.subplots_adjust(left=0.16)
     pyplot.title("Kasus per Provinsi (" + date + ")")
-    pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 14})
+    pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 14}, loc=4)
     pyplot.grid(True, axis='x')
     pyplot.gca().invert_yaxis()
     for elem in elements:
