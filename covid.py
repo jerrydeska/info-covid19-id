@@ -81,7 +81,6 @@ def check_indo_case():
             today_positive = src['update']['penambahan']['jumlah_positif']
             today_cured = src['update']['penambahan']['jumlah_sembuh']
             today_death = src['update']['penambahan']['jumlah_meninggal']
-            today_case = [today_positive, today_cured, today_death]
 
             twit.append("#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n")
             twit.append("Positif: {:,}".format(positive).replace(',','.'))
@@ -92,7 +91,7 @@ def check_indo_case():
             twit.append(" (+{:,})\n".format(today_death).replace(',','.'))
             twit.append('\nSumber: https://covid19.go.id/')
             
-            indo_case_graph(today_case)
+            indo_case_graph(src)
             separator = ''
             final_twit = separator.join(twit)
 
@@ -105,17 +104,21 @@ def check_indo_case():
 
     return final_twit
 
-def indo_case_graph(today_case):
-    date = datetime.now().strftime('%Y-%m-%d')
-    mydb.execute("INSERT INTO daily_case VALUES('" + str(date) + "'," + str(today_case[0]) + "," + str(today_case[1]) + "," + str(today_case[2]) + ")")
-    db.commit()
+def indo_case_graph(src):
+    tanggal, positif, sembuh, meninggal = [], [], [], []
 
-    df = pandas.read_sql("SELECT * FROM daily_case", db)
-    df['date'] = pandas.to_datetime(df['date'])
+    for data_harian in src['update']['harian']:
+        tanggal.append(data_harian['key_as_string'])
+        positif.append(data_harian['jumlah_positif']['value'])
+        sembuh.append(data_harian['jumlah_sembuh']['value'])
+        meninggal.append(data_harian['jumlah_meninggal']['value'])
+
+    tanggal = pandas.to_datetime(tanggal)
+
     pyplot.figure(num=None, figsize=(15, 8), dpi=80)
-    pyplot.plot(df['date'],df['positive'])
-    pyplot.plot(df['date'],df['cured'])
-    pyplot.plot(df['date'],df['death'])
+    pyplot.plot(tanggal, positif)
+    pyplot.plot(tanggal, sembuh)
+    pyplot.plot(tanggal, meninggal)
     pyplot.title("Kasus per Hari")
     pyplot.grid(True)
     pyplot.legend(["Positif", "Sembuh", "Meninggal"], prop={'size': 14})
@@ -333,4 +336,3 @@ def reply():
 while True:
     reply()
     time.sleep(10)
-    
