@@ -18,6 +18,15 @@ auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
 
+db = mysql.connector.connect(
+    host = environ['HOST'],
+    user = environ['USER'],
+    passwd = environ['PASSWD'],
+    database = environ['DATABASE']
+)
+
+mydb = db.cursor()
+
 #---TWITTER ID---
 
 def get_last_id():
@@ -240,14 +249,6 @@ def rujukan(mention):
 #---END OF HOSPITAL---
 
 def reply():
-    db = mysql.connector.connect(
-        host = environ['HOST'],
-        user = environ['USER'],
-        passwd = environ['PASSWD'],
-        database = environ['DATABASE']
-    )
-
-    mydb = db.cursor()
     
     print('Mengambil data...')
     final_twit = check_indo_case()
