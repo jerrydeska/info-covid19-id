@@ -9,15 +9,6 @@ from datetime import datetime
 import pandas
 from matplotlib import pyplot
 
-db = mysql.connector.connect(
-    host = environ['HOST'],
-    user = environ['USER'],
-    passwd = environ['PASSWD'],
-    database = environ['DATABASE']
-)
-
-mydb = db.cursor()
-
 CONSUMER_KEY = environ['CONSUMER_KEY']
 CONSUMER_SECRET = environ['CONSUMER_SECRET']
 ACCESS_KEY = environ['ACCESS_KEY']
@@ -249,6 +240,15 @@ def rujukan(mention):
 #---END OF HOSPITAL---
 
 def reply():
+    db = mysql.connector.connect(
+        host = environ['HOST'],
+        user = environ['USER'],
+        passwd = environ['PASSWD'],
+        database = environ['DATABASE']
+    )
+
+    mydb = db.cursor()
+    
     print('Mengambil data...')
     final_twit = check_indo_case()
     if final_twit:
