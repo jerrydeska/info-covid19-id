@@ -338,4 +338,4 @@ def reply():
             
 while True:
     reply()
-    time.sleep(10)
+    time.sleep(30)
