@@ -194,31 +194,28 @@ def set_old_article(article, table):
 
 def scraping_article(old_article, table, href):
     new_article = []
-    try:
-        result = requests.get('https://covid19.go.id/p/' + href)
-        src = result.content
-        soup = BeautifulSoup(src, 'html.parser')
-        
-        check = False
-        i = 0
+    result = requests.get('https://covid19.go.id/p/' + href)
+    src = result.content
+    soup = BeautifulSoup(src, 'html.parser')
+    
+    check = False
+    i = 0
 
-        while not check:
-            link = soup.find_all("a", class_="text-color-dark")[i]
-            if link.attrs['href'] == old_article[0][1]:
-                check = True
+    while not check:
+        link = soup.find_all("a", class_="text-color-dark")[i]
+        if link.attrs['href'] == old_article[0][1]:
+            check = True
+        else:
+            if table == 'berita' and 'infografis' in link.text.lower():
+                pass
             else:
-                if table == 'berita' and 'infografis' in link.text.lower():
-                    pass
-                else:
-                    article = []
-                    article.append(link.text)
-                    article.append(link.attrs['href'])
-                    new_article.append(article)
-            i += 1
-    except:
-        print('Error ' + href)
-    finally:
-        return new_article
+                article = []
+                article.append(link.text)
+                article.append(link.attrs['href'])
+                new_article.append(article)
+        i += 1
+        
+    return new_article
 
 #---END OF ARTICLE---
 
@@ -250,91 +247,93 @@ def rujukan(mention):
 
 def reply():
     print('Mengambil data...')
-    
-    final_twit = check_indo_case()
-    if final_twit:
-        graph1 = api.media_upload(filename = "img/graph1.png")
-        api.update_status(final_twit, media_ids = [graph1.media_id])
-        print("Berhasil twit kasus Indonesia baru!")
+    try:
+        final_twit = check_indo_case()
+        if final_twit:
+            graph1 = api.media_upload(filename = "img/graph1.png")
+            api.update_status(final_twit, media_ids = [graph1.media_id])
+            print("Berhasil twit kasus Indonesia baru!")
 
-    final_twit = check_prov_case()
-    if final_twit:
-        graph2 = api.media_upload(filename = "img/graph2.png")
-        api.update_status(final_twit, media_ids = [graph2.media_id])
-        print("Berhasil twit kasus Provinsi baru!")
+        final_twit = check_prov_case()
+        if final_twit:
+            graph2 = api.media_upload(filename = "img/graph2.png")
+            api.update_status(final_twit, media_ids = [graph2.media_id])
+            print("Berhasil twit kasus Provinsi baru!")
 
-    articles = [['hoax', '#HoaxBuster\n', 'hoax-buster'], ['berita', '#BeritaTerkini\n', 'berita'], ['protokol', '#Protokol\n', 'protokol']]
-    for i in range(0, len(articles)):
-        old_article = get_old_article(articles[i][0])
-        new_article = scraping_article(old_article, articles[i][0], articles[i][2])
-    
-        if new_article:
-            print("Mendapatkan artikel baru...")
-            set_old_article(new_article, articles[i][0])
-            for x in range(0, len(new_article)):
-                api.update_status(articles[i][1] + new_article[x][0] + "\n\nSelengkapnya: " + new_article[x][1])
-                print("Berhasil twit artikel baru!")
+        articles = [['hoax', '#HoaxBuster\n', 'hoax-buster'], ['berita', '#BeritaTerkini\n', 'berita'], ['protokol', '#Protokol\n', 'protokol']]
+        for i in range(0, len(articles)):
+            old_article = get_old_article(articles[i][0])
+            new_article = scraping_article(old_article, articles[i][0], articles[i][2])
+        
+            if new_article:
+                print("Mendapatkan artikel baru...")
+                set_old_article(new_article, articles[i][0])
+                for x in range(0, len(new_article)):
+                    api.update_status(articles[i][1] + new_article[x][0] + "\n\nSelengkapnya: " + new_article[x][1])
+                    print("Berhasil twit artikel baru!")
 
-    last_id = get_last_id()
-    mentions = api.mentions_timeline(last_id[0][0], tweet_mode='extended')
-    for mention in reversed(mentions):
-        last_id[0][0] = mention.id
-        set_last_id(last_id)
-        if '#kasusindo' in mention.full_text.lower():
-            result = requests.get('https://data.covid19.go.id/public/api/update.json')
-            src = result.json()
+        last_id = get_last_id()
+        mentions = api.mentions_timeline(last_id[0][0], tweet_mode='extended')
+        for mention in reversed(mentions):
+            last_id[0][0] = mention.id
+            set_last_id(last_id)
+            if '#kasusindo' in mention.full_text.lower():
+                result = requests.get('https://data.covid19.go.id/public/api/update.json')
+                src = result.json()
 
-            positive = "{:,}".format(src['update']['total']['jumlah_positif']).replace(',','.')
-            cured = "{:,}".format(src['update']['total']['jumlah_sembuh']).replace(',','.')
-            death = "{:,}".format(src['update']['total']['jumlah_meninggal']).replace(',','.')
-            today_positive = "{:,}".format(src['update']['penambahan']['jumlah_positif']).replace(',','.')
-            today_cured = "{:,}".format(src['update']['penambahan']['jumlah_sembuh']).replace(',','.')
-            today_death = "{:,}".format(src['update']['penambahan']['jumlah_meninggal']).replace(',','.')
+                positive = "{:,}".format(src['update']['total']['jumlah_positif']).replace(',','.')
+                cured = "{:,}".format(src['update']['total']['jumlah_sembuh']).replace(',','.')
+                death = "{:,}".format(src['update']['total']['jumlah_meninggal']).replace(',','.')
+                today_positive = "{:,}".format(src['update']['penambahan']['jumlah_positif']).replace(',','.')
+                today_cured = "{:,}".format(src['update']['penambahan']['jumlah_sembuh']).replace(',','.')
+                today_death = "{:,}".format(src['update']['penambahan']['jumlah_meninggal']).replace(',','.')
 
-            print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
-            print("Berhasil membalas twit!")
-        if '#gejala' in mention.full_text.lower():
-            print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            api.update_status('@' + mention.user.screen_name + ' Gejala umum yang dirasakan:\n1. Demam\n2. Batuk Kering\n3. Sesak Napas\n\nGejala lain yang dapat muncul:\n1. Diare\n2. Sakit Kepala\n3. Mata Merah\n4. Hilangnya kemampuan mengecap rasa atau mencium bau\n5. Ruam di kulit\n\nSumber: https://www.alodokter.com/virus-corona', mention.id)
-            print("Berhasil membalas twit!")
-        if '#cucitangan' in mention.full_text.lower():
-            print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            image = api.media_upload(filename = "img/Etika-Mencuci-Tangan.png")
-            api.update_status(status = '@' + mention.user.screen_name + ' Sumber: Humas Litbangkes', in_reply_to_status_id = mention.id, media_ids = [image.media_id])
-            print("Berhasil membalas twit!")
-        if '#pencegahan' in mention.full_text.lower():
-            print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            image = api.media_upload(filename = "img/Cara-Cegah-Virus-Corona.jpeg")
-            api.update_status(status = '@' + mention.user.screen_name + ' Sumber: Kemkominfo RI', in_reply_to_status_id = mention.id, media_ids = [image.media_id])
-            print("Berhasil membalas twit!")
-        if '#rujukan' in mention.full_text.lower():
-            print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            final_twit = rujukan(mention.full_text.lower())
-            if final_twit:
-                api.update_status('@' + mention.user.screen_name + ' ' + final_twit, mention.id)
+                print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
+                api.update_status('@' + mention.user.screen_name + ' Informasi kasus COVID-19 terbaru:\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
                 print("Berhasil membalas twit!")
-            else:
-                print("Provinsi tidak ditemukan!")
-        if '#kasusprov' in mention.full_text.lower():
-            print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            result = requests.get('https://data.covid19.go.id/public/api/prov.json')
-            src = result.json()
-
-            for data in src['list_data']:
-                if data['key'].lower() in mention.full_text.lower():
-                    date = src['last_date']
-                    positive = "{:,}".format(data['jumlah_kasus']).replace(',','.')
-                    cured = "{:,}".format(data['jumlah_sembuh']).replace(',','.')
-                    death = "{:,}".format(data['jumlah_meninggal']).replace(',','.')
-                    today_positive = "{:,}".format(data['penambahan']['positif']).replace(',','.')
-                    today_cured = "{:,}".format(data['penambahan']['sembuh']).replace(',','.')
-                    today_death = "{:,}".format(data['penambahan']['meninggal']).replace(',','.')
-                    prov_name = data['key']
-                    
-                    api.update_status('@' + mention.user.screen_name + ' Kasus Provinsi ' + prov_name + ' (' + date + ')\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
+            if '#gejala' in mention.full_text.lower():
+                print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
+                api.update_status('@' + mention.user.screen_name + ' Gejala umum yang dirasakan:\n1. Demam\n2. Batuk Kering\n3. Sesak Napas\n\nGejala lain yang dapat muncul:\n1. Diare\n2. Sakit Kepala\n3. Mata Merah\n4. Hilangnya kemampuan mengecap rasa atau mencium bau\n5. Ruam di kulit\n\nSumber: https://www.alodokter.com/virus-corona', mention.id)
+                print("Berhasil membalas twit!")
+            if '#cucitangan' in mention.full_text.lower():
+                print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
+                image = api.media_upload(filename = "img/Etika-Mencuci-Tangan.png")
+                api.update_status(status = '@' + mention.user.screen_name + ' Sumber: Humas Litbangkes', in_reply_to_status_id = mention.id, media_ids = [image.media_id])
+                print("Berhasil membalas twit!")
+            if '#pencegahan' in mention.full_text.lower():
+                print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
+                image = api.media_upload(filename = "img/Cara-Cegah-Virus-Corona.jpeg")
+                api.update_status(status = '@' + mention.user.screen_name + ' Sumber: Kemkominfo RI', in_reply_to_status_id = mention.id, media_ids = [image.media_id])
+                print("Berhasil membalas twit!")
+            if '#rujukan' in mention.full_text.lower():
+                print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
+                final_twit = rujukan(mention.full_text.lower())
+                if final_twit:
+                    api.update_status('@' + mention.user.screen_name + ' ' + final_twit, mention.id)
                     print("Berhasil membalas twit!")
-                    break
+                else:
+                    print("Provinsi tidak ditemukan!")
+            if '#kasusprov' in mention.full_text.lower():
+                print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
+                result = requests.get('https://data.covid19.go.id/public/api/prov.json')
+                src = result.json()
+
+                for data in src['list_data']:
+                    if data['key'].lower() in mention.full_text.lower():
+                        date = src['last_date']
+                        positive = "{:,}".format(data['jumlah_kasus']).replace(',','.')
+                        cured = "{:,}".format(data['jumlah_sembuh']).replace(',','.')
+                        death = "{:,}".format(data['jumlah_meninggal']).replace(',','.')
+                        today_positive = "{:,}".format(data['penambahan']['positif']).replace(',','.')
+                        today_cured = "{:,}".format(data['penambahan']['sembuh']).replace(',','.')
+                        today_death = "{:,}".format(data['penambahan']['meninggal']).replace(',','.')
+                        prov_name = data['key']
+                        
+                        api.update_status('@' + mention.user.screen_name + ' Kasus Provinsi ' + prov_name + ' (' + date + ')\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
+                        print("Berhasil membalas twit!")
+                        break
+    except Exception as e:
+        print(e)
             
 while True:
     reply()
