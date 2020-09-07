@@ -193,29 +193,32 @@ def set_old_article(article, table):
     db.commit()
 
 def scraping_article(old_article, table, href):
-    result = requests.get('https://covid19.go.id/p/' + href)
-    src = result.content
-    soup = BeautifulSoup(src, 'html.parser')
-
-    check = False
-    i = 0
     new_article = []
+    try:
+        result = requests.get('https://covid19.go.id/p/' + href)
+        src = result.content
+        soup = BeautifulSoup(src, 'html.parser')
+        
+        check = False
+        i = 0
 
-    while not check:
-        link = soup.find_all("a", class_="text-color-dark")[i]
-        if link.attrs['href'] == old_article[0][1]:
-            check = True
-        else:
-            if table == 'berita' and 'infografis' in link.text.lower():
-                pass
+        while not check:
+            link = soup.find_all("a", class_="text-color-dark")[i]
+            if link.attrs['href'] == old_article[0][1]:
+                check = True
             else:
-                article = []
-                article.append(link.text)
-                article.append(link.attrs['href'])
-                new_article.append(article)
-        i += 1
-
-    return new_article
+                if table == 'berita' and 'infografis' in link.text.lower():
+                    pass
+                else:
+                    article = []
+                    article.append(link.text)
+                    article.append(link.attrs['href'])
+                    new_article.append(article)
+            i += 1
+    except:
+        print('Error ' + href)
+    finally:
+        return new_article
 
 #---END OF ARTICLE---
 
