@@ -63,46 +63,49 @@ def set_check_prov(bool_check):
 #---INDO CASE---
 
 def check_indo_case():
-    result = requests.get('https://data.covid19.go.id/public/api/update.json')
-    src = result.json()
-
     final_twit = []
-    twit = []
+    try:
+        result = requests.get('https://data.covid19.go.id/public/api/update.json')
+        src = result.json()
 
-    check = get_check()
-    date = datetime.now().strftime('%Y-%m-%d')
-    if date in src['update']['penambahan']['created']:
-        if check[0][0]:
-            pass
+        twit = []
+
+        check = get_check()
+        date = datetime.now().strftime('%Y-%m-%d')
+        if date in src['update']['penambahan']['created']:
+            if check[0][0]:
+                pass
+            else:
+                positive = src['update']['total']['jumlah_positif']
+                cured = src['update']['total']['jumlah_sembuh']
+                death = src['update']['total']['jumlah_meninggal']
+                today_positive = src['update']['penambahan']['jumlah_positif']
+                today_cured = src['update']['penambahan']['jumlah_sembuh']
+                today_death = src['update']['penambahan']['jumlah_meninggal']
+
+                twit.append("#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n")
+                twit.append("Positif: {:,}".format(positive).replace(',','.'))
+                twit.append(" (+{:,})\n".format(today_positive).replace(',','.'))
+                twit.append("Sembuh: {:,}".format(cured).replace(',','.'))
+                twit.append(" (+{:,})\n".format(today_cured).replace(',','.'))
+                twit.append("Meninggal: {:,}".format(death).replace(',','.'))
+                twit.append(" (+{:,})\n".format(today_death).replace(',','.'))
+                twit.append('\nSumber: https://covid19.go.id/')
+                
+                indo_case_graph(src)
+                separator = ''
+                final_twit = separator.join(twit)
+
+                set_check_indo(1)
         else:
-            positive = src['update']['total']['jumlah_positif']
-            cured = src['update']['total']['jumlah_sembuh']
-            death = src['update']['total']['jumlah_meninggal']
-            today_positive = src['update']['penambahan']['jumlah_positif']
-            today_cured = src['update']['penambahan']['jumlah_sembuh']
-            today_death = src['update']['penambahan']['jumlah_meninggal']
-
-            twit.append("#UPDATE\nInformasi kasus COVID-19 terbaru:\n\n")
-            twit.append("Positif: {:,}".format(positive).replace(',','.'))
-            twit.append(" (+{:,})\n".format(today_positive).replace(',','.'))
-            twit.append("Sembuh: {:,}".format(cured).replace(',','.'))
-            twit.append(" (+{:,})\n".format(today_cured).replace(',','.'))
-            twit.append("Meninggal: {:,}".format(death).replace(',','.'))
-            twit.append(" (+{:,})\n".format(today_death).replace(',','.'))
-            twit.append('\nSumber: https://covid19.go.id/')
-            
-            indo_case_graph(src)
-            separator = ''
-            final_twit = separator.join(twit)
-
-            set_check_indo(1)
-    else:
-        if not check[0][0]:
-            pass
-        else:
-            set_check_indo(0)
-
-    return final_twit
+            if not check[0][0]:
+                pass
+            else:
+                set_check_indo(0)
+    except:
+        print('Gagal mengambil kasus Indonesia')
+    finally:
+        return final_twit
 
 def indo_case_graph(src):
     tanggal, positif, sembuh, meninggal = [], [], [], []
@@ -129,27 +132,29 @@ def indo_case_graph(src):
 #---PROV CASE---
 
 def check_prov_case():
-    result = requests.get('https://data.covid19.go.id/public/api/prov.json')
-    src = result.json()
-
     final_twit = ""
+    try:
+        result = requests.get('https://data.covid19.go.id/public/api/prov.json')
+        src = result.json()
 
-    check = get_check()
-    date = datetime.now().strftime('%Y-%m-%d')
-    if date == src['last_date']:
-        if check[0][1]:
-            pass
+        check = get_check()
+        date = datetime.now().strftime('%Y-%m-%d')
+        if date == src['last_date']:
+            if check[0][1]:
+                pass
+            else:
+                final_twit = "#UPDATE\nKasus per provinsi. Untuk melihat detail per-provinsi, mention akun ini dengan hashtag #kasusprov + nama provinsi (Cth: #kasusprov DKI Jakarta)\n\nSumber: https://covid19.go.id/"
+                prov_case_graph(src)
+                set_check_prov(1)
         else:
-            final_twit = "#UPDATE\nKasus per provinsi. Untuk melihat detail per-provinsi, mention akun ini dengan hashtag #kasusprov + nama provinsi (Cth: #kasusprov DKI Jakarta)\n\nSumber: https://covid19.go.id/"
-            prov_case_graph(src)
-            set_check_prov(1)
-    else:
-        if not check[0][1]:
-            pass
-        else:
-            set_check_prov(0)
-    
-    return final_twit
+            if not check[0][1]:
+                pass
+            else:
+                set_check_prov(0)
+    except:
+        print('Gagal mengambil kasus per-provinsi di Indonesia')
+    finally:
+        return final_twit
 
 def prov_case_graph(src):
     date = src['last_date']
@@ -216,7 +221,7 @@ def scraping_article(old_article, table, href):
                     new_article.append(article)
             i += 1
     except:
-        print('Error ' + href)
+        print('Gagal mengambil ' + href)
     finally:
         return new_article
 
