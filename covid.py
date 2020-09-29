@@ -328,7 +328,9 @@ def reply():
 
             for data in src['list_data']:
                 if data['key'].lower() in mention.full_text.lower():
-                    if (data['key'] == 'Riau' and 'kepulauan riau' not in mention.full_text.lower()) or (data['key'] == 'Papua' and 'papua barat' not in mention.full_text.lower()) or (data['key'] == 'Maluku' and 'maluku utara' not in mention.full_text.lower()):
+                    if (data['key'] == 'Riau' and 'kepulauan riau' in mention.full_text.lower()) or (data['key'] == 'Papua' and 'papua barat' in mention.full_text.lower()) or (data['key'] == 'Maluku' and 'maluku utara' in mention.full_text.lower()):
+                        pass
+                    else:
                         date = src['last_date']
                         positive = "{:,}".format(data['jumlah_kasus']).replace(',','.')
                         cured = "{:,}".format(data['jumlah_sembuh']).replace(',','.')
