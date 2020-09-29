@@ -328,18 +328,19 @@ def reply():
 
             for data in src['list_data']:
                 if data['key'].lower() in mention.full_text.lower():
-                    date = src['last_date']
-                    positive = "{:,}".format(data['jumlah_kasus']).replace(',','.')
-                    cured = "{:,}".format(data['jumlah_sembuh']).replace(',','.')
-                    death = "{:,}".format(data['jumlah_meninggal']).replace(',','.')
-                    today_positive = "{:,}".format(data['penambahan']['positif']).replace(',','.')
-                    today_cured = "{:,}".format(data['penambahan']['sembuh']).replace(',','.')
-                    today_death = "{:,}".format(data['penambahan']['meninggal']).replace(',','.')
-                    prov_name = data['key']
-                    
-                    api.update_status('@' + mention.user.screen_name + ' Kasus Provinsi ' + prov_name + ' (' + date + ')\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
-                    print("Berhasil membalas twit!")
-                    break
+                    if (data['key'] == 'Riau' and 'kepulauan riau' not in mention.full_text.lower()) or (data['key'] == 'Papua' and 'papua barat' not in mention.full_text.lower()) or (data['key'] == 'Maluku' and 'maluku utara' not in mention.full_text.lower()):
+                        date = src['last_date']
+                        positive = "{:,}".format(data['jumlah_kasus']).replace(',','.')
+                        cured = "{:,}".format(data['jumlah_sembuh']).replace(',','.')
+                        death = "{:,}".format(data['jumlah_meninggal']).replace(',','.')
+                        today_positive = "{:,}".format(data['penambahan']['positif']).replace(',','.')
+                        today_cured = "{:,}".format(data['penambahan']['sembuh']).replace(',','.')
+                        today_death = "{:,}".format(data['penambahan']['meninggal']).replace(',','.')
+                        prov_name = data['key']
+                        
+                        api.update_status('@' + mention.user.screen_name + ' Kasus Provinsi ' + prov_name + ' (' + date + ')\n\nPositif: ' + positive + ' (+' + today_positive + ')\nSembuh: ' + cured + ' (+' + today_cured + ')\nMeninggal: ' + death + ' (+' + today_death + ')\n\nSumber: https://covid19.go.id/', mention.id)
+                        print("Berhasil membalas twit!")
+                        break
             
 while True:
     reply()
