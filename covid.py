@@ -328,7 +328,7 @@ def reply():
 
             for data in src['list_data']:
                 if data['key'].lower() in mention.full_text.lower():
-                    if (data['key'] == 'Riau' and 'kepulauan riau' in mention.full_text.lower()) or (data['key'] == 'Papua' and 'papua barat' in mention.full_text.lower()) or (data['key'] == 'Maluku' and 'maluku utara' in mention.full_text.lower()):
+                    if (data['key'] == 'RIAU' and 'kepulauan riau' in mention.full_text.lower()) or (data['key'] == 'PAPUA' and 'papua barat' in mention.full_text.lower()) or (data['key'] == 'MALUKU' and 'maluku utara' in mention.full_text.lower()):
                         pass
                     else:
                         date = src['last_date']
