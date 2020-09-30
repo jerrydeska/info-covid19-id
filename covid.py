@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import tweepy
 import time
 import csv
-import mysql.connector
+import psycopg2
 from os import environ
 from datetime import datetime
 import pandas
@@ -18,10 +18,10 @@ auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
 
-db = mysql.connector.connect(
+db = psycopg2.connect(
     host = environ['HOST'],
     user = environ['USER'],
-    passwd = environ['PASSWD'],
+    password = environ['PASSWD'],
     database = environ['DATABASE']
 )
 
