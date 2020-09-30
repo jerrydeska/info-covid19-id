@@ -76,6 +76,7 @@ def check_indo_case():
             if check[0][0]:
                 pass
             else:
+                set_check_indo(1)
                 positive = src['update']['total']['jumlah_positif']
                 cured = src['update']['total']['jumlah_sembuh']
                 death = src['update']['total']['jumlah_meninggal']
@@ -95,8 +96,6 @@ def check_indo_case():
                 indo_case_graph(src)
                 separator = ''
                 final_twit = separator.join(twit)
-
-                set_check_indo(1)
         else:
             if not check[0][0]:
                 pass
@@ -143,9 +142,9 @@ def check_prov_case():
             if check[0][1]:
                 pass
             else:
-                final_twit = "#UPDATE\nKasus per provinsi. Untuk melihat detail per-provinsi, mention akun ini dengan hashtag #kasusprov + nama provinsi (Cth: #kasusprov DKI Jakarta)\n\nSumber: https://covid19.go.id/"
                 prov_case_graph(src)
                 set_check_prov(1)
+                final_twit = "#UPDATE\nKasus per provinsi. Untuk melihat detail per-provinsi, mention akun ini dengan hashtag #kasusprov + nama provinsi (Cth: #kasusprov DKI Jakarta)\n\nSumber: https://covid19.go.id/"
         else:
             if not check[0][1]:
                 pass
