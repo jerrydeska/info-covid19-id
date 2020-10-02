@@ -133,7 +133,7 @@ def indo_case_graph(src):
 def check_prov_case():
     final_twit = ""
     try:
-        result = requests.get('https://data.covid19.go.id/public/api/prov.json')
+        result = requests.get('https://data.covid19.go.id/public/api/prov.json', timeout=15)
         src = result.json()
 
         check = get_check()
@@ -158,7 +158,7 @@ def check_prov_case():
 def prov_case_graph(src):
     date = src['last_date']
 
-    result = requests.get('https://data.covid19.go.id/public/api/update.json')
+    result = requests.get('https://data.covid19.go.id/public/api/update.json', timeout=15)
     src2 = result.json()
     
     positif, sembuh, meninggal, nama_provinsi = [], [], [], []
@@ -199,7 +199,7 @@ def set_old_article(article, table):
 def scraping_article(old_article, table, href):
     new_article = []
     try:
-        result = requests.get('https://covid19.go.id/p/' + href)
+        result = requests.get('https://covid19.go.id/p/' + href, timeout=15)
         src = result.content
         soup = BeautifulSoup(src, 'html.parser')
         
@@ -285,7 +285,7 @@ def reply():
         last_id[0][0] = mention.id
         set_last_id(last_id)
         if '#kasusindo' in mention.full_text.lower():
-            result = requests.get('https://data.covid19.go.id/public/api/update.json')
+            result = requests.get('https://data.covid19.go.id/public/api/update.json', timeout=15)
             src = result.json()
 
             positive = "{:,}".format(src['update']['total']['jumlah_positif']).replace(',','.')
@@ -322,7 +322,7 @@ def reply():
                 print("Provinsi tidak ditemukan!")
         if '#kasusprov' in mention.full_text.lower():
             print("mendapatkan twit \"" + mention.full_text + " - " + str(mention.id) + "\"")
-            result = requests.get('https://data.covid19.go.id/public/api/prov.json')
+            result = requests.get('https://data.covid19.go.id/public/api/prov.json', timeout=15)
             src = result.json()
 
             for data in src['list_data']:
