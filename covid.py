@@ -65,7 +65,7 @@ def set_check_prov(bool_check):
 def check_indo_case():
     final_twit = []
     try:
-        result = requests.get('https://data.covid19.go.id/public/api/update.json')
+        result = requests.get('https://data.covid19.go.id/public/api/update.json', timeout=15)
         src = result.json()
 
         twit = []
