@@ -63,6 +63,6 @@ tweepy==3.8.0
 typing-extensions==3.7.4.2
 urllib3==1.26.5
 virtualenv==20.0.21
-websockets==8.1
+websockets==9.1
 wrapt==1.11.2
 yarl==1.5.0
